@@ -1,5 +1,3 @@
-from collections import deque
-
 from simulation.util import *
 
 
@@ -10,31 +8,34 @@ class RoundRobinScheduler:
         self.runnable = runnable
         self.blocked = blocked
 
-    def scheduling(self, logs, inventory):
-        def check_blocked_processes():
-            if len(self.blocked) > 0 and len(inventory) > 0:
-                temp(self.blocked.popleft(), Transition.BLOCKED_READY,
-                     self.runnable.appendleft)
-
-        def temp(process, transition, action=lambda p: ...):
-            logs.append(Log(self.timer.now(), process, transition))
+    def scheduling(self, logs, inventory_not_empty):
+        def perform_transition(process, transition, action=lambda p: ...):
+            log_transition(process, transition)
             action(process)
             process.state = transition.after()
 
+        def log_transition(process, transition):
+            logs.append(Log(self.timer.now(), process, transition))
+
+        def unblock_if_possible():
+            if len(self.blocked) > 0 and inventory_not_empty():
+                perform_transition(self.blocked.popleft(), Transition.BLOCKED_READY,
+                                   self.runnable.appendleft)
+
         _timer = Timer()
 
-        check_blocked_processes()
-        temp(p := self.runnable.popleft(), Transition.READY_RUNNING)
+        unblock_if_possible()
+        perform_transition(process := self.runnable.popleft(), Transition.READY_RUNNING)
         try:
-            while p.state == State.RUNNING and next(_timer) < self.quantum:
-                p.doWork()
+            while process.state == State.RUNNING and next(_timer) < self.quantum:
+                process.doWork()
                 next(self.timer)
-            if p.state == State.RUNNING:
-                temp(p, Transition.RUNNING_READY, self.runnable.append)
-            elif p.state == State.FINISHED:
-                temp(p, Transition.RUNNING_FINISHED)
+            if process.state == State.RUNNING:
+                perform_transition(process, Transition.RUNNING_READY, self.runnable.append)
+            elif process.state == State.FINISHED:
+                perform_transition(process, Transition.RUNNING_FINISHED)
         except EmptyInventoryError:
-            temp(p, Transition.RUNNING_BLOCKED, self.blocked.append)
+            perform_transition(process, Transition.RUNNING_BLOCKED, self.blocked.append)
 
 
 class Transition(Enum):
