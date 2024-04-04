@@ -1,5 +1,6 @@
+from collections import deque
+
 from simulation.util import *
-from simulation.util import State
 
 
 class RoundRobinScheduler:
@@ -10,20 +11,10 @@ class RoundRobinScheduler:
         self.blocked = blocked
 
     def scheduling(self, logs, inventory):
-        def next_process():
+        def check_blocked_processes():
             if len(self.blocked) > 0 and len(inventory) > 0:
-                p = self.blocked.popleft()
-
-                temp(p, Transition.BLOCKED_READY, self.runnable.appendleft)
-
-                # p.state = State.READY
-                # self.runnable.appendleft(p)
-                # logs.append(l := Log(self.timer.now(), p, Transition.BLOCKED_READY))
-
-                # print(l)
-
-            if len(self.runnable) > 0:
-                return self.runnable.popleft()
+                temp(self.blocked.popleft(), Transition.BLOCKED_READY,
+                     self.runnable.appendleft)
 
         def temp(process, transition, action=lambda p: ...):
             logs.append(Log(self.timer.now(), process, transition))
@@ -31,34 +22,19 @@ class RoundRobinScheduler:
             process.state = transition.after()
 
         _timer = Timer()
-        p = next_process()
 
-        temp(p, Transition.READY_RUNNING)
-
-        # p.state = State.RUNNING
-        # logs.append(l := Log(self.timer.now(), p, Transition.READY_RUNNING))
-
-        # print(l)
+        check_blocked_processes()
+        temp(p := self.runnable.popleft(), Transition.READY_RUNNING)
         try:
             while p.state == State.RUNNING and next(_timer) < self.quantum:
                 p.doWork()
                 next(self.timer)
             if p.state == State.RUNNING:
                 temp(p, Transition.RUNNING_READY, self.runnable.append)
-
-                # p.state = State.READY
-                # self.runnable.append(p)
-                # logs.append(l := Log(self.timer.now(), p, Transition.RUNNING_READY))
-                # print(l)
             elif p.state == State.FINISHED:
-                logs.append(l := Log(self.timer.now(), p, Transition.RUNNING_FINISHED))
-                # print(l)
+                temp(p, Transition.RUNNING_FINISHED)
         except EmptyInventoryError:
-
-            p.state = State.BLOCKED
-            self.blocked.append(p)
-            logs.append(l := Log(self.timer.now(), p, Transition.RUNNING_BLOCKED))
-            # print(l)
+            temp(p, Transition.RUNNING_BLOCKED, self.blocked.append)
 
 
 class Transition(Enum):
@@ -73,10 +49,3 @@ class Transition(Enum):
 
     def after(self):
         return self.value[1]
-
-    @classmethod
-    def of(cls, before, after):
-        for transition in cls:
-            if transition.value[:2] == (before, after):
-                return transition
-        raise ValueError(f"No such transition from {before} to {after}")
