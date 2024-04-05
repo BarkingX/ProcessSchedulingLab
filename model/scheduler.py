@@ -1,16 +1,31 @@
 from simulation.util import *
-from simulation.util import SchedulerService
+
+
+class ScheduleHelper:
+    logs = []
+
+    def __init__(self, timer, inventory_not_empty):
+        self.timer = timer
+        self.inventory_not_empty = inventory_not_empty
+
+    def log_transition(self, transition, process):
+        self.logs.append(Log(self.timer.now(), transition, process))
+
+    @staticmethod
+    def perform_transition(transition, process, action=lambda p: ...):
+        process.state = transition.after()
+        action(process)
 
 
 class RoundRobinScheduler:
-    def __init__(self, runnable, blocked, service: SchedulerService, quantum=3):
+    def __init__(self, runnable, blocked, helper: ScheduleHelper, quantum=3):
         self.runnable = runnable
         self.blocked = blocked
-        self.service = service
+        self.helper = helper
         self.quantum = quantum
 
     def scheduling(self):
-        self._unblock_if(len(self.blocked) > 0 and self.service.inventory_not_empty())
+        self._unblock_if(len(self.blocked) > 0 and self.helper.inventory_not_empty())
         self._log_and_transition(Transition.READY_RUNNING, self.runnable.popleft(),
                                  after_t=self._run)
 
@@ -20,15 +35,15 @@ class RoundRobinScheduler:
                                      after_t=self.runnable.appendleft)
 
     def _log_and_transition(self, t, p, *, after_t=lambda p: ...):
-        self.service.log_transition(t, p)
-        self.service.perform_transition(t, p, after_t)
+        self.helper.log_transition(t, p)
+        self.helper.perform_transition(t, p, after_t)
 
     def _run(self, p):
         _timer = Timer()
         try:
             while p.state == State.RUNNING and _timer.next() < self.quantum:
                 p.run()
-                self.service.timer.next()
+                self.helper.timer.next()
         except EmptyInventoryError:
             self._log_and_transition(Transition.RUNNING_BLOCKED, p,
                                      after_t=self.blocked.append)

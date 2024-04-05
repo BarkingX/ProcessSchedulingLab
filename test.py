@@ -1,9 +1,8 @@
 from collections import deque
 
-from simulation.process import Producer, Consumer
-from simulation.scheduler import RoundRobinScheduler
-from simulation.util import Timer, SchedulerService
-
+from simulation.model.process import Producer, Consumer
+from simulation.model.scheduler import RoundRobinScheduler, ScheduleHelper
+from simulation.util import Timer
 
 inventory = []
 append = inventory.append
@@ -28,11 +27,11 @@ def add_new_consumer():
 add_new_consumer()
 add_new_producer()
 
-service = SchedulerService(Timer(1), not_empty)
-scheduler = RoundRobinScheduler(ps, bps, service)
+helper = ScheduleHelper(Timer(1), not_empty)
+scheduler = RoundRobinScheduler(ps, bps, helper)
 
 while True and (len(ps) > 0 or len(bps) > 0):
     scheduler.scheduling()
 
-for log in service.logs:
+for log in helper.logs:
     print(log)

@@ -28,8 +28,8 @@ class Process:
 
 
 class Producer(Process):
-    def __init__(self, append_item):
-        super().__init__()
+    def __init__(self, append_item, **kwargs):
+        super().__init__(**kwargs)
         self.append_item = append_item
 
     def run(self):
@@ -39,8 +39,8 @@ class Producer(Process):
 
 
 class Consumer(Process):
-    def __init__(self, get_item):
-        super().__init__()
+    def __init__(self, get_item, **kwargs):
+        super().__init__(**kwargs)
         self.get_item = get_item
         self.item = None
 
