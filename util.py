@@ -17,6 +17,22 @@ class EmptyInventoryError(Exception):
         super().__init__(message)
 
 
+class SchedulerService:
+    logs = []
+
+    def __init__(self, timer, inventory_not_empty):
+        self.timer = timer
+        self.inventory_not_empty = inventory_not_empty
+
+    def log_transition(self, transition, process):
+        self.logs.append(Log(self.timer.now(), transition, process))
+
+    @staticmethod
+    def perform_transition(transition, process, action=lambda p: ...):
+        process.state = transition.after()
+        action(process)
+
+
 class Timer(itertools.count):
     _now = 0
 
@@ -27,9 +43,12 @@ class Timer(itertools.count):
     def now(self):
         return self._now
 
+    def next(self):
+        return self.__next__()
+
 
 class Log:
-    def __init__(self, occur_time, process, transition):
+    def __init__(self, occur_time, transition, process):
         self.time = occur_time
         self.process = process
         self.transition = transition
@@ -44,3 +63,5 @@ class Log:
 
 class Item:
     pass
+
+

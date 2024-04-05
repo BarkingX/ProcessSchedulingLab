@@ -1,43 +1,43 @@
 from simulation.util import *
+from simulation.util import SchedulerService
 
 
 class RoundRobinScheduler:
-    def __init__(self, timer, runnable, blocked, quantum=3):
-        self.quantum = quantum
-        self.timer = timer
+    def __init__(self, runnable, blocked, service: SchedulerService, quantum=3):
         self.runnable = runnable
         self.blocked = blocked
+        self.service = service
+        self.quantum = quantum
 
-    def scheduling(self, inventory_not_empty, transition, log):
-        def log_and_transition(t, p, *args):
-            log(t, p)
-            transition(t, p, *args)
+    def scheduling(self):
+        self._unblock_if(len(self.blocked) > 0 and self.service.inventory_not_empty())
+        self._log_and_transition(Transition.READY_RUNNING, self.runnable.popleft(),
+                                 after_t=self._run)
 
-        def unblock_if_possible():
-            if len(self.blocked) > 0 and inventory_not_empty():
-                log_and_transition(Transition.BLOCKED_READY, self.blocked.popleft(),
-                                   self.runnable.appendleft)
+    def _unblock_if(self, condition):
+        if condition:
+            self._log_and_transition(Transition.BLOCKED_READY, self.blocked.popleft(),
+                                     after_t=self.runnable.appendleft)
 
-        def run(p):
-            _timer = Timer()
-            try:
-                while p.state == State.RUNNING and next(_timer) < self.quantum:
-                    p.run()
-                    next(self.timer)
-            except EmptyInventoryError:
-                log_and_transition(Transition.RUNNING_BLOCKED, p,
-                                   self.blocked.append)
+    def _log_and_transition(self, t, p, *, after_t=lambda p: ...):
+        self.service.log_transition(t, p)
+        self.service.perform_transition(t, p, after_t)
+
+    def _run(self, p):
+        _timer = Timer()
+        try:
+            while p.state == State.RUNNING and _timer.next() < self.quantum:
+                p.run()
+                self.service.timer.next()
+        except EmptyInventoryError:
+            self._log_and_transition(Transition.RUNNING_BLOCKED, p,
+                                     after_t=self.blocked.append)
+        else:
+            if p.state == State.FINISHED:
+                self._log_and_transition(Transition.RUNNING_FINISHED, p)
             else:
-                if p.state == State.FINISHED:
-                    log_and_transition(Transition.RUNNING_FINISHED, p)
-                else:
-                    log_and_transition(Transition.RUNNING_READY, p,
-                                       self.runnable.append)
-
-        unblock_if_possible()
-        process = self.runnable.popleft()
-        log_and_transition(Transition.READY_RUNNING, process)
-        run(process)
+                self._log_and_transition(Transition.RUNNING_READY, p,
+                                         after_t=self.runnable.append)
 
 
 class Transition(Enum):

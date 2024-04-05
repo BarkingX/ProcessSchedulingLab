@@ -1,6 +1,5 @@
 import itertools
 import math
-from time import sleep
 
 from simulation.util import State, EmptyInventoryError, Item
 
@@ -9,13 +8,14 @@ class Process:
     _id_generator = itertools.count(1)
     working_time_unit = .5
 
-    def __init__(self):
+    def __init__(self, burst_time=5*working_time_unit):
         self.id = next(self._id_generator)
         self.state = State.READY
-        self.remaining_time = 5 * self.working_time_unit
+        self.remaining_time = burst_time
 
     def run(self):
-        sleep(self.working_time_unit)
+        # TODO
+        # sleep(self.working_time_unit)
         self.remaining_time -= self.working_time_unit
         if math.isclose(self.remaining_time, 0):
             self.state = State.FINISHED
