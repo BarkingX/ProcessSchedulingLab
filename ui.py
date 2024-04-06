@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from simulation.model.process import Process
+
 
 class SimulationApp:
     def __init__(self, root):
@@ -12,7 +14,7 @@ class SimulationApp:
         self.input_frame = tk.Frame(root)
         self.input_frame.pack(padx=10, pady=10)
         # 创建下拉菜单
-        options = ["Random Process", "Producer", "Consumer"]
+        options = [cls.__name__ for cls in Process.__subclasses__()]
         self.dropdown_var = tk.StringVar(self.input_frame)
         self.dropdown_var.set(options[0])  # 默认选择第一个选项
         self.dropdown = tk.OptionMenu(self.input_frame, self.dropdown_var, *options)

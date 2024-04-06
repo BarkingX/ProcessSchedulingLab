@@ -1,13 +1,18 @@
-import tkinter as tk
+import sys
 
-from simulation.ui import SimulationApp
+from PySide6.QtWidgets import QApplication
 
-# 创建主窗口
-root = tk.Tk()
-root.title("Process Simulation")
+from simulation.controller import SimulationController
+from simulation.model.model import SimulationModel
+from simulation.view import SimulationView
 
-# 创建程序实例
-app = SimulationApp(root)
+# # 创建主窗口
 
-# 运行主循环
-root.mainloop()
+app = QApplication([])
+
+model = SimulationModel()
+view = SimulationView()
+controller = SimulationController(model, view)
+
+view.show()
+sys.exit(app.exec())

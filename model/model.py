@@ -1,6 +1,6 @@
 from collections import deque
 
-from simulation.model.process import Producer, Consumer
+from simulation.model.process import Producer, Consumer, Process
 from simulation.model.scheduler import RoundRobinScheduler, ScheduleHelper
 from simulation.util import Timer
 
@@ -31,8 +31,15 @@ class SimulationModel:
         self.processes.append(process)
         self.runnable.append(process)
 
+    def new_type(self, process_type, **kwargs):
+        if 'Producer' == process_type:
+            return self.new_producer(**kwargs)
+        elif 'Consumer' == process_type:
+            return self.new_consumer(**kwargs)
+
     def new_producer(self, **kwargs):
         return Producer(self.inventory.append, **kwargs)
 
     def new_consumer(self, **kwargs):
         return Consumer(self.inventory.pop, **kwargs)
+
