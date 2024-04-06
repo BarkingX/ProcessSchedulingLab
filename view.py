@@ -1,4 +1,4 @@
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QMainWindow, QVBoxLayout, QHBoxLayout, QWidget,
@@ -13,10 +13,7 @@ from simulation.model.process import Process
 class SimulationView(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(strings.WINDOW_TITLE)
-
         main_widget = QWidget(self)
-        self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
 
         self.pause_resume_action = QAction(strings.PAUSE_RESUME, self)
@@ -25,7 +22,6 @@ class SimulationView(QMainWindow):
         self.next_turn_action.setShortcut(strings.NEXT_TURN_KEY)
         self.reset_action = QAction(strings.RESET, self)
         self.reset_action.setShortcut(strings.RESET_KEY)
-
         toolbar = QToolBar(self)
         toolbar.setIconSize(QSize(16, 16))
         toolbar.addAction(self.pause_resume_action)
@@ -34,10 +30,8 @@ class SimulationView(QMainWindow):
         self.addToolBar(toolbar)
 
         input_widget = QWidget(main_widget)
-        # input_layout_widget = QWidget(input_widget)
         input_layout = QHBoxLayout(input_widget)
         main_layout.addWidget(input_widget)
-
         self.ptype_dropdown = QComboBox(input_widget)
         self.ptype_dropdown.addItems([cls.__name__ for cls in Process.__subclasses__()])
         self.burst_time_input = QLineEdit(input_widget)
@@ -45,7 +39,6 @@ class SimulationView(QMainWindow):
                                                         QSizePolicy.Policy.Fixed))
         self.create_process_button = QPushButton(strings.CREATE_PROCESS, input_widget)
         self.show_log_button = QPushButton(strings.SHOW_LOG, input_widget)
-
         input_layout.addWidget(self.ptype_dropdown)
         input_layout.addWidget(self.burst_time_input)
         input_layout.addWidget(self.create_process_button)
@@ -53,30 +46,40 @@ class SimulationView(QMainWindow):
         input_layout.addWidget(self.show_log_button)
 
         process_status_widget = QWidget(main_widget)
-        self.runnable_queue_title = QLabel(strings.RUNNABLE_QUEUE, process_status_widget)
-        self.blocked_queue_title = QLabel(strings.BLOCKED_QUEUE, process_status_widget)
+        process_table_title = QLabel(strings.PROCESS, process_status_widget)
+        runnable_queue_title = QLabel(strings.RUNNABLE_QUEUE, process_status_widget)
+        blocked_queue_title = QLabel(strings.BLOCKED_QUEUE, process_status_widget)
         self.process_table_view = QTableView(process_status_widget)
         self.runnable_queue_view = QListView(process_status_widget)
         self.blocked_queue_view = QListView(process_status_widget)
-
+        hcenter = Qt.AlignmentFlag.AlignHCenter
+        right = Qt.AlignmentFlag.AlignRight
         process_status_layout = QGridLayout(process_status_widget)
+        process_status_layout.addWidget(process_table_title, 0, 0, alignment=hcenter)
+        process_status_layout.addWidget(runnable_queue_title, 0, 1, alignment=hcenter)
+        process_status_layout.addWidget(blocked_queue_title, 0, 2, alignment=hcenter)
+        process_status_layout.addWidget(self.process_table_view, 1, 0)
+        process_status_layout.addWidget(self.runnable_queue_view, 1, 1, alignment=right)
+        process_status_layout.addWidget(self.blocked_queue_view, 1, 2, alignment=right)
+        process_status_layout.setColumnStretch(0, 4)
+        process_status_layout.setColumnStretch(1, 1)
+        process_status_layout.setColumnStretch(2, 1)
+        process_status_layout.setSpacing(10)
         process_status_widget.setLayout(process_status_layout)
-        process_status_layout.addWidget(self.runnable_queue_title, 0, 1, 1, 1)
-        process_status_layout.addWidget(self.blocked_queue_title, 0, 2, 1, 1)
-        process_status_layout.addWidget(self.process_table_view, 1, 0, 1, 1)
-        process_status_layout.addWidget(self.runnable_queue_view, 1, 1, 1, 1)
-        process_status_layout.addWidget(self.blocked_queue_view, 1, 2, 1, 1)
         main_layout.addWidget(process_status_widget)
 
-        self.current_time_label = QLabel('Current Time: 0')
-        self.current_process_label = QLabel('Current Process ID: None')
-        self.item_count_label = QLabel('Item Count: 0')
+        self.current_time_label = QLabel(strings.Templates.CURRENT_TIME.format(0))
+        self.current_process_label = QLabel(
+            strings.Templates.CURRENT_PROCESS_ID.format('None'))
+        self.item_count_label = QLabel(strings.Templates.ITEM_COUNT.format(0))
         status_bar = QStatusBar(self)
         status_bar.addPermanentWidget(self.current_time_label)
         status_bar.addPermanentWidget(self.current_process_label)
         status_bar.addPermanentWidget(self.item_count_label)
         self.setStatusBar(status_bar)
 
+        self.setWindowTitle(strings.WINDOW_TITLE)
+        self.setCentralWidget(main_widget)
 
 
     def update(self):
@@ -101,9 +104,10 @@ class SimulationView(QMainWindow):
             self.process_status_table.setItem(row_position, col, item)
 
     def update_labels(self, time, process, item_count):
-        self.current_time_label.setText(f'Current Time: {time}')
-        self.current_process_label.setText(f'Current Process ID: {process}')
-        self.item_count_label.setText(f'Item Count: {item_count}')
+        self.current_time_label.setText(strings.Templates.CURRENT_TIME.format(time))
+        self.current_process_label.setText(
+            strings.Templates.CURRENT_PROCESS_ID.format(process))
+        self.item_count_label.setText(strings.Templates.ITEM_COUNT.format(item_count))
 
     def process_type_and_burst_time(self):
         return self.ptype_dropdown.currentText(), self.burst_time_input.text()

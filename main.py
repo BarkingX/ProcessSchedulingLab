@@ -8,8 +8,7 @@ from simulation.view import SimulationView
 
 # # 创建主窗口
 
-app = QApplication([])
-
+app = QApplication(sys.argv)
 model = SimulationModel()
 view = SimulationView()
 controller = SimulationController(model, view)
