@@ -82,7 +82,7 @@ class SimulationApp:
 
     def create_process(self):
         pass
-        # burst_time = int(self.burst_time_entry.get())
+        # burst_time = int(self.burst_time_input.get())
         # process_type = self.dropdown_var.get()
         # new_process = Process(burst_time, process_type)
         # self.processes.append(new_process)
