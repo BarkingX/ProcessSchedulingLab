@@ -12,6 +12,7 @@ app = QApplication(sys.argv)
 model = SimulationModel()
 view = SimulationView()
 controller = SimulationController(model, view)
+controller.configure_view()
 
 view.show()
 sys.exit(app.exec())

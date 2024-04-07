@@ -1,5 +1,6 @@
 from collections import deque
 
+from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex
 from simulation.model.process import Producer, Consumer, Process
 from simulation.model.scheduler import RoundRobinScheduler, ScheduleHelper
 from simulation.util import Timer
@@ -43,3 +44,32 @@ class SimulationModel:
     def new_consumer(self, **kwargs):
         return Consumer(self.inventory.pop, **kwargs)
 
+
+class ProcessModel(QAbstractItemModel):
+    def __init__(self, data, parent=None):
+        super().__init__(parent)
+        self._data = data
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._data)
+
+    def columnCount(self, parent=QModelIndex()):
+        return 4  # Assuming 4 attributes in Process class
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            process = self._data[index.row()]
+            if index.column() == 0:
+                return process.id
+            elif index.column() == 1:
+                return process.__class__.__name__
+            elif index.column() == 2:
+                return process.state
+            elif index.column() == 3:
+                return process.remaining_time
+        return None  # Return None for other roles or unsupported columns
+
+    def index(self, row, column, parent=QModelIndex()):
+        if self.hasIndex(row, column, parent):
+            return self.createIndex(row, column)
+        return QModelIndex()

@@ -1,6 +1,7 @@
 import itertools
 import math
 
+from simulation import strings
 from simulation.util import State, EmptyInventoryError, Item
 
 
@@ -22,7 +23,7 @@ class Process:
             self.state = State.FINISHED
 
     def __str__(self):
-        return f'进程{self.id}:{self.__class__.__name__}'
+        return f'{strings.PROCESS}{self.id}: {self.__class__.__name__}'
 
     def __repr__(self):
         return (f'{self.__class__.__name__}(id={self.id}, state={self.state}, '
