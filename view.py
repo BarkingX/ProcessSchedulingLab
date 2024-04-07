@@ -1,23 +1,15 @@
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QAction, QStandardItemModel, QStandardItem
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import *
 
 from simulation import strings
 from simulation.model.process import Process
 
 
-def _update_queue(model, queue):
-    model.clear()
-    for p in queue:
-        model.appendRow(QStandardItem(p))
-
-
 def _non_editable_listview(parent):
     list_view = QListView(parent)
     list_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-    model = QStandardItemModel(list_view)
-    list_view.setModel(model)
-    return list_view, model
+    return list_view
 
 
 class SimulationView(QMainWindow):
@@ -59,16 +51,11 @@ class SimulationView(QMainWindow):
         process_table_title = QLabel(strings.PROCESS, process_status_widget)
         runnable_queue_title = QLabel(strings.RUNNABLE_QUEUE, process_status_widget)
         blocked_queue_title = QLabel(strings.BLOCKED_QUEUE, process_status_widget)
-        self.process_table_view = QTableWidget(process_status_widget)
-        self.process_table_view.setColumnCount(4)
-        self.process_table_view.setHorizontalHeaderLabels(
-            ['ID', 'Type', 'State', 'Remaining Time'])
+        self.process_table_view = QTableView(process_status_widget)
         self.process_table_view.horizontalHeader().setStretchLastSection(True)
 
-        (self.runnable_queue_view,
-         self.runnable_queue_model) = _non_editable_listview(process_status_widget)
-        (self.blocked_queue_view,
-         self.blocked_queue_model) = _non_editable_listview(process_status_widget)
+        self.runnable_queue_view= _non_editable_listview(process_status_widget)
+        self.blocked_queue_view = _non_editable_listview(process_status_widget)
 
         hcenter = Qt.AlignmentFlag.AlignHCenter
         right = Qt.AlignmentFlag.AlignRight
@@ -102,28 +89,6 @@ class SimulationView(QMainWindow):
     def update(self):
         pass
 
-    def update_process_table(self, records):
-        records = list(records)
-        print(records)
-        self.process_table_view.setRowCount(len(records))
-        for row, record in enumerate(records):
-            for col, value in enumerate(record):
-                item = QTableWidgetItem(str(value))
-                self.process_table_view.setItem(row, col, item)
-
-    def update_runnable_queue(self, runnable_queue):
-        _update_queue(self.runnable_queue_model, runnable_queue)
-
-    def update_blocked_queue(self, blocked_queue):
-        _update_queue(self.blocked_queue_model, blocked_queue)
-
-    def append_process_table(self, process_info):
-        row_position = self.process_table_view.rowCount()
-        self.process_table_view.insertRow(row_position)
-        for col, value in enumerate(process_info):
-            item = QTableWidgetItem(str(value))
-            self.process_table_view.setItem(row_position, col, item)
-
     def update_labels(self, time, process, item_count):
         self.current_time_label.setText(strings.Templates.CURRENT_TIME.format(time))
         self.current_process_label.setText(
@@ -135,6 +100,10 @@ class SimulationView(QMainWindow):
 
     def set_create_process(self, callback):
         self.create_process_button.clicked.connect(callback)
+        return self
+
+    def set_process_table_model(self, model):
+        self.process_table_view.setModel(model)
         return self
 
     def set_runnable_model(self, model):

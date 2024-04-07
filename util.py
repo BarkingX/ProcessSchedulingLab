@@ -1,5 +1,10 @@
 import itertools
+import re
 from enum import Enum
+
+
+def is_valid_floatnumber(s):
+    return re.fullmatch(r'(\d*[.])?\d+', s)
 
 
 class State(Enum):
@@ -47,3 +52,5 @@ class Log:
 
 class Item:
     pass
+
+
