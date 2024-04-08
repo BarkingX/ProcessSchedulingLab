@@ -12,7 +12,7 @@ def _non_editable_listview(parent):
     return list_view
 
 
-class SimulationView(QMainWindow):
+class SchedulingView(QMainWindow):
     def __init__(self):
         super().__init__()
         main_widget = QWidget(self)
@@ -100,32 +100,24 @@ class SimulationView(QMainWindow):
 
     def set_create_process(self, callback):
         self.create_process_button.clicked.connect(callback)
-        return self
 
     def set_process_table_model(self, model):
         self.process_table_view.setModel(model)
-        return self
 
     def set_runnable_model(self, model):
         self.runnable_queue_view.setModel(model)
-        return self
 
     def set_blocked_model(self, model):
         self.blocked_queue_view.setModel(model)
-        return self
 
     def set_show_log(self, callback):
         self.show_log_button.clicked.connect(callback)
-        return self
 
     def set_pause_resume(self, callback):
         self.pause_resume_action.triggered.connect(callback)
-        return self
 
     def set_next_turn(self, callback):
         self.next_turn_action.triggered.connect(callback)
-        return self
 
     def set_reset_simulation(self, callback):
         self.reset_action.triggered.connect(callback)
-        return self

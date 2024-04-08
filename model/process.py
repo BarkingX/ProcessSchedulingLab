@@ -7,7 +7,7 @@ from simulation.util import State, EmptyInventoryError, Item
 
 class Process:
     _id_generator = itertools.count(1)
-    working_time_unit = .5
+    working_time_unit = 1
     default_burst_time = 5 * working_time_unit
 
     def __init__(self, burst_time=default_burst_time):
@@ -28,9 +28,6 @@ class Process:
     def __repr__(self):
         return (f'{self.__class__.__name__}(id={self.id}, state={self.state}, '
                 f'remaining_time={self.remaining_time})')
-
-    def to_record(self):
-        return self.id, self.__class__.__name__, self.state, self.remaining_time
 
 
 class Producer(Process):
