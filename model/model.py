@@ -9,8 +9,8 @@ class SchedulingModel:
     def __init__(self):
         self.inventory = []
         self.processes = []
-        self.runnable = deque()
-        self.blocked = deque()
+        self.runnables = deque()
+        self.blockeds = deque()
 
     def item_count(self):
         return len(self.inventory)
@@ -29,7 +29,7 @@ class SchedulingModel:
 
     def add_process(self, process):
         self.processes.append(process)
-        self.runnable.append(process)
+        self.runnables.append(process)
 
 
 class ProcessTableModel(QAbstractItemModel):

@@ -15,12 +15,12 @@ class Process:
         self.id = next(self._id_generator)
         self.state = State.READY
         self.remaining_time = burst_time
+        self.elapsed_time = burst_time
 
     def run(self):
-        # TODO
         self.remaining_time -= self.working_time_unit
-        if math.isclose(self.remaining_time, 0):
-            self.state = State.FINISHED
+        # if math.isclose(self.remaining_time, 0):
+        #     self.state = State.FINISHED
 
     def __str__(self):
         return f'{strings.PROCESS}{self.id}: {self.__class__.__name__}'
@@ -37,7 +37,7 @@ class Producer(Process):
 
     def run(self):
         super().run()
-        if self.state == State.FINISHED:
+        if math.isclose(0, self.remaining_time):
             self.append_item(Item())
 
 

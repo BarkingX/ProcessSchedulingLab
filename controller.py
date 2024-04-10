@@ -24,7 +24,7 @@ class SchedulingController:
 
         self.qtimer = QTimer(self.view)
         self.qtimer.timeout.connect(self._next_turn)
-        self.qtimer.start(3000)
+        self.qtimer.start(1000)
 
     def configure_view(self):
         self.view.set_create_process(self._create_process)
@@ -44,7 +44,8 @@ class SchedulingController:
             self.runnable_queue_model.end_append_row()
 
     def _next_turn(self):
-        self.scheduler.scheduling(after_every_run=self.update_ui)
+        self.scheduler.scheduling()
+        self.update_ui(self.scheduler.running)
 
     def update_ui(self, p):
         self.tablemodel.update_row(self.scheduling_model.processes.index(p))

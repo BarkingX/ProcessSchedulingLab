@@ -1,67 +1,64 @@
+import itertools
+import math
+
 from simulation.util import *
 from functools import partial
 
+
+def _log_transition(logs, time, trans, procs):
+    logs.append(Log(time, trans, procs))
+
+
 class RoundRobinScheduler:
     logs = []
+    running = None
+    elapsed_time = None
 
     def __init__(self, timer, model, quantum=3):
         self.timer = timer
-        self.runnable = model.runnable
-        self.blocked = model.blocked
+        self.runnables = model.runnables
+        self.blockeds = model.blockeds
         self.item_count = model.item_count
         self.quantum = quantum
 
-    def scheduling(self, *, after_every_run=None):
-        self._try_unblock_if_possible()
-        self._pop_next_runnable_to_run(after_every_run=after_every_run)
+    def scheduling(self):
+        if not self.running:
+            self._try_unblock_if_possible()
+            self.elapsed_time = 0
+            self.running = self.runnables.popleft()
+            self._log_and_transition(Transition.READY_RUNNING, self.running)
+
+        self._run_process(self.running)
+
+        if not self.running.state == State.RUNNING:
+            self.running = None
 
     def _try_unblock_if_possible(self):
-        if len(self.blocked) > 0 and self.item_count() > 0:
+        if len(self.blockeds) > 0 and self.item_count() > 0:
             self._log_and_transition(Transition.BLOCKED_READY,
-                                     self.blocked.popleft(),
-                                     after_t=self.runnable.appendleft)
+                                     self.blockeds.popleft(),
+                                     after_t=self.runnables.appendleft)
 
     def _log_and_transition(self, t, p, *, after_t=lambda p: ...):
-        self.perform_transition(t, p, after_t)
-        self.log_transition(t, p)
+        _log_transition(self.logs, self.timer.now(), t, p)
+        p.state = t.after()
+        after_t(p)
 
-    def _pop_next_runnable_to_run(self, *, after_every_run=None):
+    def _run_process(self, p):
         try:
-            self._log_and_transition(Transition.READY_RUNNING,
-                                     self.runnable.popleft(),
-                                     after_t=partial(self._run,
-                                                     after_every_run=after_every_run))
-        except IndexError:
-            pass
-
-    def _run(self, p, *, after_every_run=None):
-        _timer = Timer()
-        try:
-            while p.state == State.RUNNING and _timer.next() < self.quantum:
-                if after_every_run:
-                    after_every_run(p)
+            if self.elapsed_time < self.quantum:
                 p.run()
                 self.timer.next()
+                self.elapsed_time += 1
         except EmptyInventoryError:
             self._log_and_transition(Transition.RUNNING_BLOCKED, p,
-                                     after_t=self.blocked.append)
+                                     after_t=self.blockeds.append)
         else:
-            if p.state == State.FINISHED:
+            if math.isclose(0, p.remaining_time):
                 self._log_and_transition(Transition.RUNNING_FINISHED, p)
-            elif p.state == State.RUNNING:
+            elif self.elapsed_time >= self.quantum:
                 self._log_and_transition(Transition.RUNNING_READY, p,
-                                         after_t=self.runnable.append)
-        finally:
-            if after_every_run:
-                after_every_run(p)
-
-    def log_transition(self, transition, process):
-        self.logs.append(Log(self.timer.now(), transition, process))
-
-    @staticmethod
-    def perform_transition(transition, process, action=lambda p: ...):
-        process.state = transition.after()
-        action(process)
+                                         after_t=self.runnables.append)
 
 
 class Transition(Enum):

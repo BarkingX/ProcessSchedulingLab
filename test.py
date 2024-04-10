@@ -1,3 +1,4 @@
+import itertools
 from collections import deque
 
 from simulation.model.process import Producer, Consumer
@@ -29,14 +30,15 @@ add_new_producer()
 
 
 temp_model = Timer()
-temp_model.runnable = ps
-temp_model.blocked = bps
+temp_model.runnables = ps
+temp_model.blockeds = bps
 temp_model.item_count = not_empty
 
 scheduler = RoundRobinScheduler(Timer(1), temp_model)
 
-while True and (len(ps) > 0 or len(bps) > 0):
+while True and (len(ps) > 0 or len(bps) > 0 or scheduler.running):
     scheduler.scheduling()
 
 for log in scheduler.logs:
     print(log)
+

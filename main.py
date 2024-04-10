@@ -13,8 +13,8 @@ scheduling_model = SchedulingModel()
 view = SchedulingView()
 tablemodel = ProcessTableModel(view, ['id', 'type', 'state', 'remaining_time'],
                                scheduling_model.processes)
-runnable_queue_model = ProcessQueueModel(view, scheduling_model.runnable)
-blocked_queue_model = ProcessQueueModel(view, scheduling_model.blocked)
+runnable_queue_model = ProcessQueueModel(view, scheduling_model.runnables)
+blocked_queue_model = ProcessQueueModel(view, scheduling_model.blockeds)
 
 controller = SchedulingController(scheduling_model, view, tablemodel,
                                   runnable_queue_model, blocked_queue_model)
