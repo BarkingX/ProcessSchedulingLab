@@ -44,16 +44,14 @@ class SchedulingController:
             self.runnable_queue_model.end_append_row()
 
     def _next_turn(self):
-        p = self.scheduler.scheduling()
-        if p:
-            self.tablemodel.update_row(self.scheduling_model.processes.index(p))
-            if p in self.scheduling_model.runnable or p.state == State.FINISHED:
-                self.runnable_queue_model.update_row(0)
-            elif p in self.scheduling_model.blocked:
-                self.blocked_queue_model.update_row(0)
-        self.view.update_labels(self.timer.now(), p.id if p else None,
+        self.scheduler.scheduling(after_every_run=self.update_ui)
+
+    def update_ui(self, p):
+        self.tablemodel.update_row(self.scheduling_model.processes.index(p))
+        self.runnable_queue_model.update_row(0)
+        self.blocked_queue_model.update_row(0)
+        self.view.update_labels(self.timer.now(), p.id,
                                 len(self.scheduling_model.inventory))
-        self.timer.next()
 
     def start_simulation(self):
         pass

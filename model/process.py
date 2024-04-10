@@ -1,5 +1,6 @@
 import itertools
 import math
+from time import sleep
 
 from simulation import strings
 from simulation.util import State, EmptyInventoryError, Item
@@ -17,7 +18,6 @@ class Process:
 
     def run(self):
         # TODO
-        # sleep(self.working_time_unit)
         self.remaining_time -= self.working_time_unit
         if math.isclose(self.remaining_time, 0):
             self.state = State.FINISHED

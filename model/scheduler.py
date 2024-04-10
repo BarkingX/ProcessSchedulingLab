@@ -1,20 +1,5 @@
 from simulation.util import *
-
-
-class ScheduleHelper:
-
-    def __init__(self, timer, inventory_not_empty):
-        self.timer = timer
-        self.inventory_not_empty = inventory_not_empty
-
-    # def log_transition(self, transition, process):
-    #     self.logs.append(Log(self.timer.now(), transition, process))
-    #
-    # @staticmethod
-    # def perform_transition(transition, process, action=lambda p: ...):
-    #     process.state = transition.after()
-    #     action(process)
-
+from functools import partial
 
 class RoundRobinScheduler:
     logs = []
@@ -26,9 +11,9 @@ class RoundRobinScheduler:
         self.item_count = model.item_count
         self.quantum = quantum
 
-    def scheduling(self):
+    def scheduling(self, *, after_every_run=None):
         self._try_unblock_if_possible()
-        return self._pop_next_runnable_to_run()
+        self._pop_next_runnable_to_run(after_every_run=after_every_run)
 
     def _try_unblock_if_possible(self):
         if len(self.blocked) > 0 and self.item_count() > 0:
@@ -36,24 +21,25 @@ class RoundRobinScheduler:
                                      self.blocked.popleft(),
                                      after_t=self.runnable.appendleft)
 
-    def _pop_next_runnable_to_run(self):
+    def _log_and_transition(self, t, p, *, after_t=lambda p: ...):
+        self.perform_transition(t, p, after_t)
+        self.log_transition(t, p)
+
+    def _pop_next_runnable_to_run(self, *, after_every_run=None):
         try:
             self._log_and_transition(Transition.READY_RUNNING,
-                                     p:=self.runnable.popleft(),
-                                     after_t=self._run)
-            return p
+                                     self.runnable.popleft(),
+                                     after_t=partial(self._run,
+                                                     after_every_run=after_every_run))
         except IndexError:
             pass
 
-
-    def _log_and_transition(self, t, p, *, after_t=lambda p: ...):
-        self.log_transition(t, p)
-        self.perform_transition(t, p, after_t)
-
-    def _run(self, p):
+    def _run(self, p, *, after_every_run=None):
         _timer = Timer()
         try:
             while p.state == State.RUNNING and _timer.next() < self.quantum:
+                if after_every_run:
+                    after_every_run(p)
                 p.run()
                 self.timer.next()
         except EmptyInventoryError:
@@ -62,9 +48,12 @@ class RoundRobinScheduler:
         else:
             if p.state == State.FINISHED:
                 self._log_and_transition(Transition.RUNNING_FINISHED, p)
-            else:
+            elif p.state == State.RUNNING:
                 self._log_and_transition(Transition.RUNNING_READY, p,
                                          after_t=self.runnable.append)
+        finally:
+            if after_every_run:
+                after_every_run(p)
 
     def log_transition(self, transition, process):
         self.logs.append(Log(self.timer.now(), transition, process))
