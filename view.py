@@ -2,7 +2,7 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import *
 
-from simulation import strings
+from simulation.strings import Strings, Templates
 from simulation.model.process import Process
 
 
@@ -18,12 +18,12 @@ class SchedulingView(QMainWindow):
         main_widget = QWidget(self)
         main_layout = QVBoxLayout(main_widget)
 
-        self.pause_resume_action = QAction(strings.PAUSE_RESUME.split('/')[-1], self)
-        self.pause_resume_action.setShortcut(strings.PAUSE_RESUME_KEY)
-        self.next_turn_action = QAction(strings.NEXT_TURN, self)
-        self.next_turn_action.setShortcut(strings.NEXT_TURN_KEY)
-        self.reset_action = QAction(strings.RESET, self)
-        self.reset_action.setShortcut(strings.RESET_KEY)
+        self.pause_resume_action = QAction(Strings.PAUSE_RESUME.split('/')[-1], self)
+        self.pause_resume_action.setShortcut(Strings.PAUSE_RESUME_KEY)
+        self.next_turn_action = QAction(Strings.NEXT_TURN, self)
+        self.next_turn_action.setShortcut(Strings.NEXT_TURN_KEY)
+        self.reset_action = QAction(Strings.RESET, self)
+        self.reset_action.setShortcut(Strings.RESET_KEY)
         toolbar = QToolBar(self)
         toolbar.setIconSize(QSize(16, 16))
         toolbar.addAction(self.pause_resume_action)
@@ -39,8 +39,8 @@ class SchedulingView(QMainWindow):
         self.burst_time_input = QLineEdit(input_widget)
         self.burst_time_input.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Fixed,
                                                         QSizePolicy.Policy.Fixed))
-        self.create_process_button = QPushButton(strings.CREATE_PROCESS, input_widget)
-        self.show_log_button = QPushButton(strings.SHOW_LOG, input_widget)
+        self.create_process_button = QPushButton(Strings.CREATE_PROCESS, input_widget)
+        self.show_log_button = QPushButton(Strings.SHOW_LOG, input_widget)
         input_layout.addWidget(self.ptype_dropdown)
         input_layout.addWidget(self.burst_time_input)
         input_layout.addWidget(self.create_process_button)
@@ -48,9 +48,9 @@ class SchedulingView(QMainWindow):
         input_layout.addWidget(self.show_log_button)
 
         process_status_widget = QWidget(main_widget)
-        process_table_title = QLabel(strings.PROCESS, process_status_widget)
-        runnable_queue_title = QLabel(strings.RUNNABLE_QUEUE, process_status_widget)
-        blocked_queue_title = QLabel(strings.BLOCKED_QUEUE, process_status_widget)
+        process_table_title = QLabel(Strings.PROCESS, process_status_widget)
+        runnable_queue_title = QLabel(Strings.RUNNABLE_QUEUE, process_status_widget)
+        blocked_queue_title = QLabel(Strings.BLOCKED_QUEUE, process_status_widget)
         self.process_table_view = QTableView(process_status_widget)
         self.process_table_view.horizontalHeader().setStretchLastSection(True)
 
@@ -73,27 +73,26 @@ class SchedulingView(QMainWindow):
         process_status_widget.setLayout(process_status_layout)
         main_layout.addWidget(process_status_widget)
 
-        self.current_time_label = QLabel(strings.Templates.CURRENT_TIME.format(0))
-        self.current_process_label = QLabel(
-            strings.Templates.CURRENT_PROCESS_ID.format('None'))
-        self.item_count_label = QLabel(strings.Templates.ITEM_COUNT.format(0))
+        self.current_time_label = QLabel(Templates.CURRENT_TIME.format(0))
+        self.current_process_label = QLabel(Templates.CURRENT_PROCESS_ID.format('None'))
+        self.item_count_label = QLabel(Templates.ITEM_COUNT.format(0))
         status_bar = QStatusBar(self)
         status_bar.addPermanentWidget(self.current_time_label)
         status_bar.addPermanentWidget(self.current_process_label)
         status_bar.addPermanentWidget(self.item_count_label)
         self.setStatusBar(status_bar)
 
-        self.setWindowTitle(strings.WINDOW_TITLE)
+        self.setWindowTitle(Strings.WINDOW_TITLE)
         self.setCentralWidget(main_widget)
 
     def process_type_and_burst_time(self):
         return self.ptype_dropdown.currentText(), self.burst_time_input.text()
 
-    def update_labels(self, time, process, item_count):
-        self.current_time_label.setText(strings.Templates.CURRENT_TIME.format(time))
+    def update_labels(self, time, process_id, item_count):
+        self.current_time_label.setText(Templates.CURRENT_TIME.format(time))
         self.current_process_label.setText(
-            strings.Templates.CURRENT_PROCESS_ID.format(process))
-        self.item_count_label.setText(strings.Templates.ITEM_COUNT.format(item_count))
+            Templates.CURRENT_PROCESS_ID.format(process_id))
+        self.item_count_label.setText(Templates.ITEM_COUNT.format(item_count))
 
     def set_create_process(self, callback):
         self.create_process_button.clicked.connect(callback)

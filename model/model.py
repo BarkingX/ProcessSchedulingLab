@@ -1,14 +1,11 @@
-import re
 from collections import deque
 
 from PySide6.QtCore import Qt, QModelIndex, QAbstractTableModel
 
-from simulation.model.process import Producer, Consumer
+from simulation.model.process import Producer, Consumer, producer_pattern
 
 
 class SchedulingModel:
-    _producer_pattern = re.compile('producer', re.I)
-
     def __init__(self):
         self.inventory = []
         self.processes = []
@@ -19,7 +16,7 @@ class SchedulingModel:
         return len(self.inventory)
 
     def add_process_by_type(self, process_type, **kwargs):
-        (self.add_producer if re.match('producer', process_type, re.I)
+        (self.add_producer if producer_pattern.match(process_type)
          else self.add_consumer)(**kwargs)
 
     def add_producer(self, **kwargs):

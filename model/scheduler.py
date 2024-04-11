@@ -16,7 +16,7 @@ class RoundRobinScheduler:
         self.quantum = quantum
         self.logs = []
         self.running = None
-        self.elapsed_time = None
+        self.elapsed_time = 0
 
     def scheduling(self):
         if not self.running:
@@ -47,7 +47,7 @@ class RoundRobinScheduler:
         try:
             if self.elapsed_time < self.quantum:
                 p.run()
-                self.timer.next()
+                next(self.timer)
                 self.elapsed_time += 1
         except EmptyInventoryError:
             self._log_and_transition(Transition.RUNNING_BLOCKED, p,

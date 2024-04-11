@@ -11,7 +11,7 @@ pop = inventory.pop
 not_empty = lambda: len(inventory)
 
 p = Producer(append)
-p.remaining_time = 3 * p.working_time_unit
+p.remaining_time = 3 * p._working_time_unit
 
 ps = deque([p, Consumer(pop)])
 bps = deque()

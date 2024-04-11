@@ -3,8 +3,11 @@ import re
 from enum import Enum
 
 
+valid_floats = re.compile(r'\d+(?:\.\d+)?')
+
+
 def is_valid_floatnumber(s):
-    return re.fullmatch(r'(\d*[.])?\d+', s)
+    return valid_floats.fullmatch(s)
 
 
 class State(Enum):
@@ -32,9 +35,6 @@ class Timer(itertools.count):
     def now(self):
         return self._now
 
-    def next(self):
-        return self.__next__()
-
 
 class Log:
     def __init__(self, occur_time, transition, process):
@@ -52,5 +52,3 @@ class Log:
 
 class Item:
     pass
-
-

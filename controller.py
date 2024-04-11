@@ -2,7 +2,7 @@ import re
 
 from PySide6.QtCore import QTimer
 
-from simulation import strings
+from simulation.strings import Strings
 from simulation.model.model import *
 from simulation.model.scheduler import RoundRobinScheduler
 from simulation.util import is_valid_floatnumber, Timer
@@ -22,7 +22,6 @@ class SchedulingController:
 
         self.timer = Timer(1)
         self.scheduler = RoundRobinScheduler(self.timer, self.scheduling_model)
-
         self.qtimer = QTimer(self.view)
 
     def configure_view(self):
@@ -70,11 +69,11 @@ class SchedulingController:
         def _start_simulation():
             self.qtimer.timeout.connect(self._next_turn)
             self.qtimer.start(1000)
-            self.view.pause_resume_action.setText(strings.PAUSE_RESUME.split('/')[0])
+            self.view.pause_resume_action.setText(Strings.PAUSE_RESUME.split('/')[0])
 
         def _pause_simulation():
             self.qtimer.stop()
-            self.view.pause_resume_action.setText(strings.PAUSE_RESUME.split('/')[1])
+            self.view.pause_resume_action.setText(Strings.PAUSE_RESUME.split('/')[1])
 
         if self.qtimer.isActive():
             _pause_simulation()
