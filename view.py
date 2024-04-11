@@ -18,7 +18,7 @@ class SchedulingView(QMainWindow):
         main_widget = QWidget(self)
         main_layout = QVBoxLayout(main_widget)
 
-        self.pause_resume_action = QAction(strings.PAUSE_RESUME, self)
+        self.pause_resume_action = QAction(strings.PAUSE_RESUME.split('/')[-1], self)
         self.pause_resume_action.setShortcut(strings.PAUSE_RESUME_KEY)
         self.next_turn_action = QAction(strings.NEXT_TURN, self)
         self.next_turn_action.setShortcut(strings.NEXT_TURN_KEY)
@@ -54,7 +54,7 @@ class SchedulingView(QMainWindow):
         self.process_table_view = QTableView(process_status_widget)
         self.process_table_view.horizontalHeader().setStretchLastSection(True)
 
-        self.runnable_queue_view= _non_editable_listview(process_status_widget)
+        self.runnable_queue_view = _non_editable_listview(process_status_widget)
         self.blocked_queue_view = _non_editable_listview(process_status_widget)
 
         hcenter = Qt.AlignmentFlag.AlignHCenter
@@ -86,17 +86,14 @@ class SchedulingView(QMainWindow):
         self.setWindowTitle(strings.WINDOW_TITLE)
         self.setCentralWidget(main_widget)
 
-    def update(self):
-        pass
+    def process_type_and_burst_time(self):
+        return self.ptype_dropdown.currentText(), self.burst_time_input.text()
 
     def update_labels(self, time, process, item_count):
         self.current_time_label.setText(strings.Templates.CURRENT_TIME.format(time))
         self.current_process_label.setText(
             strings.Templates.CURRENT_PROCESS_ID.format(process))
         self.item_count_label.setText(strings.Templates.ITEM_COUNT.format(item_count))
-
-    def process_type_and_burst_time(self):
-        return self.ptype_dropdown.currentText(), self.burst_time_input.text()
 
     def set_create_process(self, callback):
         self.create_process_button.clicked.connect(callback)
@@ -113,11 +110,11 @@ class SchedulingView(QMainWindow):
     def set_show_log(self, callback):
         self.show_log_button.clicked.connect(callback)
 
-    def set_pause_resume(self, callback):
-        self.pause_resume_action.triggered.connect(callback)
-
     def set_next_turn(self, callback):
         self.next_turn_action.triggered.connect(callback)
+
+    def set_pause_resume(self, callback):
+        self.pause_resume_action.triggered.connect(callback)
 
     def set_reset_simulation(self, callback):
         self.reset_action.triggered.connect(callback)

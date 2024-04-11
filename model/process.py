@@ -19,8 +19,6 @@ class Process:
 
     def run(self):
         self.remaining_time -= self.working_time_unit
-        # if math.isclose(self.remaining_time, 0):
-        #     self.state = State.FINISHED
 
     def __str__(self):
         return f'{strings.PROCESS}{self.id}: {self.__class__.__name__}'

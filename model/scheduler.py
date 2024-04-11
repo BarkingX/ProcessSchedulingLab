@@ -1,8 +1,6 @@
-import itertools
 import math
 
 from simulation.util import *
-from functools import partial
 
 
 def _log_transition(logs, time, trans, procs):
@@ -10,21 +8,20 @@ def _log_transition(logs, time, trans, procs):
 
 
 class RoundRobinScheduler:
-    logs = []
-    running = None
-    elapsed_time = None
-
     def __init__(self, timer, model, quantum=3):
         self.timer = timer
         self.runnables = model.runnables
         self.blockeds = model.blockeds
         self.item_count = model.item_count
         self.quantum = quantum
+        self.logs = []
+        self.running = None
+        self.elapsed_time = None
 
     def scheduling(self):
         if not self.running:
-            self._try_unblock_if_possible()
             self.elapsed_time = 0
+            self._try_unblock_if_possible()
             self.running = self.runnables.popleft()
             self._log_and_transition(Transition.READY_RUNNING, self.running)
 
@@ -38,6 +35,8 @@ class RoundRobinScheduler:
             self._log_and_transition(Transition.BLOCKED_READY,
                                      self.blockeds.popleft(),
                                      after_t=self.runnables.appendleft)
+        elif len(self.runnables) == 0:
+            raise
 
     def _log_and_transition(self, t, p, *, after_t=lambda p: ...):
         _log_transition(self.logs, self.timer.now(), t, p)
@@ -69,7 +68,13 @@ class Transition(Enum):
     RUNNING_FINISHED = (State.RUNNING, State.FINISHED, '任务完成')
 
     def __str__(self):
-        return f'由“{self.value[0]:s}”到“{self.value[1]:s}”, {self.value[2]}'
+        return f'由“{self.before():s}”到“{self.after():s}”: {self.description()}'
+
+    def before(self):
+        return self.value[0]
 
     def after(self):
         return self.value[1]
+
+    def description(self):
+        return self.value[2]

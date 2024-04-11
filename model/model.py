@@ -1,11 +1,14 @@
+import re
 from collections import deque
 
-from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex
+from PySide6.QtCore import Qt, QModelIndex, QAbstractTableModel
 
 from simulation.model.process import Producer, Consumer
 
 
 class SchedulingModel:
+    _producer_pattern = re.compile('producer', re.I)
+
     def __init__(self):
         self.inventory = []
         self.processes = []
@@ -15,11 +18,9 @@ class SchedulingModel:
     def item_count(self):
         return len(self.inventory)
 
-    def add_type(self, process_type, **kwargs):
-        if 'Producer' == process_type:
-            self.add_producer(**kwargs)
-        elif 'Consumer' == process_type:
-            self.add_consumer(**kwargs)
+    def add_process_by_type(self, process_type, **kwargs):
+        (self.add_producer if re.match('producer', process_type, re.I)
+         else self.add_consumer)(**kwargs)
 
     def add_producer(self, **kwargs):
         self.add_process(Producer(self.inventory.append, **kwargs))
@@ -32,7 +33,9 @@ class SchedulingModel:
         self.runnables.append(process)
 
 
-class ProcessTableModel(QAbstractItemModel):
+class TableModel(QAbstractTableModel):
+    _column_map = None
+
     def __init__(self, parent, header, data):
         super().__init__(parent)
         self._header = header
@@ -47,24 +50,13 @@ class ProcessTableModel(QAbstractItemModel):
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             process = self._data[index.row()]
-            if index.column() == 0:
-                return process.id
-            elif index.column() == 1:
-                return process.__class__.__name__
-            elif index.column() == 2:
-                return str(process.state)
-            elif index.column() == 3:
-                return process.remaining_time
-        return None  # Return None for other roles or unsupported columns
+            return self._column_map.get(index.column(), lambda p: None)(process)
+        return None
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             return self._header[section] if 0 <= section < len(self._header) else None
         return super().headerData(section, orientation, role)
-
-    def index(self, row, column, parent=QModelIndex()):
-        return (self.createIndex(row, column)
-                if self.hasIndex(row, column, parent) else QModelIndex())
 
     def update_row(self, index):
         self.dataChanged.emit(self.index(index, 0),
@@ -76,41 +68,30 @@ class ProcessTableModel(QAbstractItemModel):
     def end_append_row(self):
         self.endInsertRows()
 
-    def parent(self, child):
-        return QModelIndex()
+
+class ProcessTableModel(TableModel):
+    _column_map = {
+        0: lambda process: process.id,
+        1: lambda process: process.__class__.__name__,
+        2: lambda process: str(process.state),
+        3: lambda process: process.remaining_time,
+    }
 
 
-class ProcessQueueModel(QAbstractItemModel):
-    def __init__(self, parent, data):
-        super().__init__(parent)
-        self._data = data
-
-    def rowCount(self, parent=QModelIndex()):
-        return len(self._data)
-
-    def columnCount(self, parent=QModelIndex()):
-        return 1
-
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            process = self._data[index.row()]
-            if index.column() == 0:
-                return str(process)
-        return None
-
-    def index(self, row, column, parent=QModelIndex()):
-        return (self.createIndex(row, column)
-                if self.hasIndex(row, column, parent) else QModelIndex())
-
-    def parent(self, child):
-        return QModelIndex()
+class ProcessQueueModel(TableModel):
+    _column_map = {
+        0: lambda process: str(process),
+    }
 
     def update_row(self, index):
         self.dataChanged.emit((i := self.index(index, 0)), i)
 
-    def begin_append_row(self):
-        self.beginInsertRows(QModelIndex(), len(self._data), len(self._data))
 
-    def end_append_row(self):
-        self.endInsertRows()
-
+class LogModel(TableModel):
+    _column_map = {
+        0: lambda _log: _log.time,
+        1: lambda _log: _log.process,
+        2: lambda _log: _log.transition.before(),
+        3: lambda _log: _log.transition.after(),
+        4: lambda _log: _log.transition.description(),
+    }
