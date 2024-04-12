@@ -1,5 +1,6 @@
 import math
 
+from simulation.model.process import Process
 from simulation.util import *
 
 
@@ -8,6 +9,9 @@ def _log_transition(logs, time, trans, procs):
 
 
 class RoundRobinScheduler:
+    dummy_process = Process(0)
+    dummy_process.id = None
+
     def __init__(self, timer, model, quantum=3):
         self.timer = timer
         self.runnables = model.runnables
@@ -15,28 +19,28 @@ class RoundRobinScheduler:
         self.item_count = model.item_count
         self.quantum = quantum
         self.logs = []
-        self.running = None
         self.elapsed_time = 0
+        self.running = self.dummy_process
 
     def scheduling(self):
-        if not self.running:
+        if self.running is self.dummy_process:
             self.elapsed_time = 0
             self._try_unblock_if_possible()
+            if len(self.runnables) == 0:
+                raise NoRunnableProcessesError()
             self.running = self.runnables.popleft()
             self._log_and_transition(Transition.READY_RUNNING, self.running)
 
         self._run_process(self.running)
 
         if not self.running.state == State.RUNNING:
-            self.running = None
+            self.running = self.dummy_process
 
     def _try_unblock_if_possible(self):
         if len(self.blockeds) > 0 and self.item_count() > 0:
             self._log_and_transition(Transition.BLOCKED_READY,
                                      self.blockeds.popleft(),
                                      after_t=self.runnables.appendleft)
-        elif len(self.runnables) == 0:
-            raise
 
     def _log_and_transition(self, t, p, *, after_t=lambda p: ...):
         _log_transition(self.logs, self.timer.now(), t, p)

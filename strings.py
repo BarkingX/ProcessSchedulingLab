@@ -13,14 +13,21 @@ class Strings:
     RESET_KEY = 'Ctrl+R'
     CREATE_PROCESS = f'创建{PROCESS}'
     SHOW_LOG = '查看日志'
-    RUNNABLE = '运行'
+
+    READY = '就绪'
+    RUNNING = '运行'
+    RUNNABLE = f'可{RUNNING}'
     BLOCKED = '阻塞'
+    FINISHED = '完成'
+
     PROCESS_TABLE = f'{PROCESS}表'
-    RUNNABLE_QUEUE = f'{RUNNABLE}队列'
+    RUNNABLE_QUEUE = f'{READY}队列'
     BLOCKED_QUEUE = f'{BLOCKED}队列'
     CURRENT_TIME = '当前时间点'
     CURRENT_PROCESS_ID = f'当前{PROCESS_ID}'
-    ITEM_COUNT = '库存量'
+    ITEM_COUNT = '库存'
+    EMPTY_INVENTORY = f'{ITEM_COUNT}为空'
+    NO_RUNNABLE_PROCESS = f'无{RUNNABLE}{PROCESS}'
 
 
 class Templates:

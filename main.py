@@ -12,6 +12,7 @@ from simulation.view import SchedulingView
 app = QApplication(sys.argv)
 scheduling_model = SchedulingModel()
 view = SchedulingView()
+view.setup()
 
 tablemodel = ProcessTableModel(view, Process.metadata, scheduling_model.processes)
 runnable_queue_model = ProcessQueueModel(view, [Strings.PROCESS],
