@@ -18,7 +18,7 @@ def _table_dialog(parent):
     log_dialog.view.horizontalHeader().setStretchLastSection(True)
     layout = QVBoxLayout(log_dialog)
     layout.addWidget(log_dialog.view)
-    log_dialog.setWindowTitle('Table View Dialog')
+    log_dialog.setWindowTitle(Strings.LOG_DIALOG_TITLE)
     log_dialog.setLayout(layout)
     log_dialog.resize(600, 400)
     return log_dialog
@@ -49,14 +49,15 @@ class SchedulingView(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
     def _setup_tool_bar(self):
-        self.pause_resume_action = QAction(Strings.PAUSE_RESUME.split('/')[-1], self)
+        self.pause_resume_action = QAction(Strings.RESUME, self)
         self.pause_resume_action.setShortcut(Strings.PAUSE_RESUME_KEY)
         self.next_turn_action = QAction(Strings.NEXT_TURN, self)
         self.next_turn_action.setShortcut(Strings.NEXT_TURN_KEY)
         self.reset_action = QAction(Strings.RESET, self)
         self.reset_action.setShortcut(Strings.RESET_KEY)
-        self.log_table_dialog = _table_dialog(self)
         self.show_log_table_action = QAction(Strings.SHOW_LOG, self)
+        self.show_log_table_action.setShortcut(Strings.SHOW_LOG_KEY)
+        self.log_table_dialog = _table_dialog(self)
         toolbar = QToolBar(self)
         toolbar.setIconSize(QSize(16, 16))
         toolbar.addAction(self.pause_resume_action)
@@ -147,3 +148,8 @@ class SchedulingView(QMainWindow):
 
     def set_reset_simulation(self, callback):
         self.reset_action.triggered.connect(callback)
+
+    def update_views(self):
+        self.process_table_view.viewport().update()
+        self.runnable_queue_view.viewport().update()
+        self.blocked_queue_view.viewport().update()

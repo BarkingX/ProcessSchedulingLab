@@ -39,6 +39,6 @@ scheduler = RoundRobinScheduler(Timer(1), temp_model)
 while True and (len(ps) > 0 or len(bps) > 0 or scheduler.running):
     scheduler.scheduling()
 
-for log in scheduler.logs:
+for log in scheduler._logs:
     print(log)
 

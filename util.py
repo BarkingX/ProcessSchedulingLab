@@ -21,6 +21,26 @@ class State(Enum):
         return self.value
 
 
+class Transition(Enum):
+    RUNNING_BLOCKED = (State.RUNNING, State.BLOCKED, '库存不足')
+    RUNNING_READY = (State.RUNNING, State.READY, '时间片到')
+    READY_RUNNING = (State.READY, State.RUNNING, '调度运行')
+    BLOCKED_READY = (State.BLOCKED, State.READY, '库存变化')
+    RUNNING_FINISHED = (State.RUNNING, State.FINISHED, '任务完成')
+
+    def __str__(self):
+        return f'由“{self.before():s}”到“{self.after():s}”: {self.description()}'
+
+    def before(self):
+        return self.value[0]
+
+    def after(self):
+        return self.value[1]
+
+    def description(self):
+        return self.value[2]
+
+
 class EmptyInventoryError(Exception):
     def __init__(self, message=Strings.EMPTY_INVENTORY):
         super().__init__(message)
@@ -41,6 +61,8 @@ class Timer(itertools.count):
 
     def now(self):
         return self._now
+
+
 
 
 class Log:

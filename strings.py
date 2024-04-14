@@ -4,13 +4,14 @@ class Strings:
     PROCESS_STATE = f'{PROCESS}状态'
     PROCESS_TYPE = f'{PROCESS}类型'
     PROCESS_REMAINING_TIME = '剩余时间'
-    WINDOW_TITLE = f'{PROCESS}调度模拟-生产者/消费者模型'
-    PAUSE_RESUME = '暂停/继续'
+    PAUSE = '暂停'
+    RESUME = '继续'
     NEXT_TURN = '下一时间点'
     RESET = '重置'
     PAUSE_RESUME_KEY = 'Ctrl+P'
     NEXT_TURN_KEY = 'Ctrl+N'
     RESET_KEY = 'Ctrl+R'
+    SHOW_LOG_KEY = 'Ctrl+L'
     CREATE_PROCESS = f'创建{PROCESS}'
     SHOW_LOG = '查看日志'
 
@@ -28,6 +29,9 @@ class Strings:
     ITEM_COUNT = '库存'
     EMPTY_INVENTORY = f'{ITEM_COUNT}为空'
     NO_RUNNABLE_PROCESS = f'无{RUNNABLE}{PROCESS}'
+
+    LOG_DIALOG_TITLE = '运行日志'
+    WINDOW_TITLE = f'{PROCESS}调度模拟-生产者/消费者模型'
 
 
 class Templates:

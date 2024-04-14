@@ -30,6 +30,12 @@ class SchedulingModel:
         self.processes.append(process)
         self.runnables.append(process)
 
+    def clear_all(self):
+        self.processes.clear()
+        self.runnables.clear()
+        self.blockeds.clear()
+        self.inventory.clear()
+
 
 class TableModel(QAbstractTableModel):
     _column_map = None
@@ -51,7 +57,8 @@ class TableModel(QAbstractTableModel):
             return None
 
         def on_display():
-            return self._column_map.get(index.column(), lambda p: None)(self._data[index.row()])
+            render = self._column_map.get(index.column(), lambda p: None)
+            return render(self._data[index.row()])
 
         def on_text_alignment():
             return Qt.AlignCenter
