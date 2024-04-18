@@ -15,11 +15,12 @@ class Process:
     _working_time_unit = 1
     _default_burst_time = 5 * _working_time_unit
 
-    def __init__(self, burst_time=_default_burst_time):
+    def __init__(self, burst_time=None):
+        if burst_time is None:
+            burst_time = self._default_burst_time
         self.id = next(self._id_generator)
         self.state = State.READY
         self._remaining_time = burst_time
-        self.elapsed_time = burst_time
 
     @property
     def remaining_time(self):
@@ -27,10 +28,11 @@ class Process:
 
     @remaining_time.setter
     def remaining_time(self, value):
-        self._remaining_time = value if value > 0 else 0
+        self._remaining_time = max(0, value)
 
     def run(self):
-        self.remaining_time -= self._working_time_unit
+        if self.remaining_time > 0:
+            self.remaining_time -= self._working_time_unit
 
     def __str__(self):
         return f'{Strings.PROCESS}{self.id}: {self.__class__.__name__}'
@@ -41,8 +43,8 @@ class Process:
 
 
 class Producer(Process):
-    def __init__(self, append_item, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, append_item, burst_time=None):
+        super().__init__(burst_time)
         self.append_item = append_item
 
     def run(self):
@@ -52,8 +54,8 @@ class Producer(Process):
 
 
 class Consumer(Process):
-    def __init__(self, get_item, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, get_item, burst_time=None):
+        super().__init__(burst_time)
         self.get_item = get_item
         self.item = None
 

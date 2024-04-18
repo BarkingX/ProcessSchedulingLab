@@ -1,5 +1,7 @@
 class Strings:
     PROCESS = '进程'
+    PRODUCER_EN = 'producer'
+    CONSUMER_EN = 'consumer'
     PROCESS_ID = f'{PROCESS}标识符'
     PROCESS_STATE = f'{PROCESS}状态'
     PROCESS_TYPE = f'{PROCESS}类型'
@@ -14,12 +16,18 @@ class Strings:
     SHOW_LOG_KEY = 'Ctrl+L'
     CREATE_PROCESS = f'创建{PROCESS}'
     SHOW_LOG = '查看日志'
+    BURST_TIME_INPUT_TIP = '进程运行时间（秒）'
 
     READY = '就绪'
     RUNNING = '运行'
-    RUNNABLE = f'可{RUNNING}'
     BLOCKED = '阻塞'
     FINISHED = '完成'
+
+    RUNNING_BLOCKED = '库存不足'
+    RUNNING_READY = '时间片到'
+    READY_RUNNING = '调度运行'
+    BLOCKED_READY = '库存变化'
+    RUNNING_FINISHED = '任务完成'
 
     PROCESS_TABLE = f'{PROCESS}表'
     RUNNABLE_QUEUE = f'{READY}队列'
@@ -28,7 +36,7 @@ class Strings:
     CURRENT_PROCESS_ID = f'当前{PROCESS_ID}'
     ITEM_COUNT = '库存'
     EMPTY_INVENTORY = f'{ITEM_COUNT}为空'
-    NO_RUNNABLE_PROCESS = f'无{RUNNABLE}{PROCESS}'
+    NO_RUNNABLE_PROCESS = f'无可{RUNNING}{PROCESS}'
 
     LOG_DIALOG_TITLE = '运行日志'
     WINDOW_TITLE = f'{PROCESS}调度模拟-生产者/消费者模型'

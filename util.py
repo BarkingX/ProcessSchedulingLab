@@ -1,14 +1,10 @@
-import itertools
-import re
 from enum import Enum
 
 from simulation.strings import Strings
 
-valid_floats = re.compile(r'\d+(?:\.\d+)?')
 
-
-def is_valid_floatnumber(s):
-    return valid_floats.fullmatch(s)
+def no_operation(*args):
+    pass
 
 
 class State(Enum):
@@ -22,11 +18,11 @@ class State(Enum):
 
 
 class Transition(Enum):
-    RUNNING_BLOCKED = (State.RUNNING, State.BLOCKED, '库存不足')
-    RUNNING_READY = (State.RUNNING, State.READY, '时间片到')
-    READY_RUNNING = (State.READY, State.RUNNING, '调度运行')
-    BLOCKED_READY = (State.BLOCKED, State.READY, '库存变化')
-    RUNNING_FINISHED = (State.RUNNING, State.FINISHED, '任务完成')
+    RUNNING_BLOCKED = (State.RUNNING, State.BLOCKED, Strings.RUNNING_BLOCKED)
+    RUNNING_READY = (State.RUNNING, State.READY, Strings.RUNNING_READY)
+    READY_RUNNING = (State.READY, State.RUNNING, Strings.READY_RUNNING)
+    BLOCKED_READY = (State.BLOCKED, State.READY, Strings.BLOCKED_READY)
+    RUNNING_FINISHED = (State.RUNNING, State.FINISHED, Strings.RUNNING_FINISHED)
 
     def __str__(self):
         return f'由“{self.before():s}”到“{self.after():s}”: {self.description()}'
@@ -47,22 +43,8 @@ class EmptyInventoryError(Exception):
 
 
 class NoRunnableProcessesError(Exception):
-    """Exception raised when no processes are runnable."""
     def __init__(self, message=Strings.NO_RUNNABLE_PROCESS):
         super().__init__(message)
-
-
-class Timer(itertools.count):
-    _now = 0
-
-    def __next__(self):
-        self._now = super().__next__()
-        return self._now
-
-    def now(self):
-        return self._now
-
-
 
 
 class Log:

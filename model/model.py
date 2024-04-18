@@ -1,44 +1,48 @@
 from collections import deque
+from typing import List, Any, Deque, Callable, Dict
 
 from PySide6.QtCore import Qt, QModelIndex, QAbstractTableModel
 from PySide6.QtGui import QColor
 
-from simulation.model.process import Producer, Consumer, producer_pattern
+from simulation.model import Producer, Consumer, Process
+from simulation.strings import Strings
 
 
 class SchedulingModel:
     def __init__(self):
-        self.inventory = []
-        self.processes = []
-        self.runnables = deque()
-        self.blockeds = deque()
+        self.inventory: List[Any] = []
+        self.processes: List[Process] = []
+        self.runnables: Deque[Process] = deque()
+        self.blockeds: Deque[Process] = deque()
+        self._constructors: Dict[str, Callable[[float], Process]] = {
+            Strings.PRODUCER_EN: lambda burst: Producer(self.inventory.append, burst),
+            Strings.CONSUMER_EN: lambda burst: Consumer(self.inventory.pop, burst),
+        }
 
     def item_count(self):
         return len(self.inventory)
 
-    def add_process_by_type(self, process_type, **kwargs):
-        (self.add_new_producer if producer_pattern.match(process_type)
-         else self.add_new_consumer)(**kwargs)
+    def process_index(self, p):
+        try:
+            return self.processes.index(p)
+        except ValueError:
+            return 0
 
-    def add_new_producer(self, **kwargs):
-        self.add_new_process(Producer(self.inventory.append, **kwargs))
+    def clear_all(self):
+        for collection in [self.processes, self.runnables, self.inventory, self.blockeds]:
+            collection.clear()
 
-    def add_new_consumer(self, **kwargs):
-        self.add_new_process(Consumer(self.inventory.pop, **kwargs))
+    def add_new_process_of(self, process_type, burst_time):
+        p_constructor = self._constructors.get(process_type.lower())
+        self.add_new_process(p_constructor(burst_time))
 
     def add_new_process(self, process):
         self.processes.append(process)
         self.runnables.append(process)
 
-    def clear_all(self):
-        self.processes.clear()
-        self.runnables.clear()
-        self.blockeds.clear()
-        self.inventory.clear()
-
 
 class TableModel(QAbstractTableModel):
-    _column_map = None
+    _column_map = {}
     _lightgray = QColor(230, 230, 230)
 
     def __init__(self, parent, header, data):
@@ -57,8 +61,8 @@ class TableModel(QAbstractTableModel):
             return None
 
         def on_display():
-            render = self._column_map.get(index.column(), lambda p: None)
-            return render(self._data[index.row()])
+            renderer = self._column_map.get(index.column(), lambda p: None)
+            return renderer(self._data[index.row()])
 
         def on_text_alignment():
             return Qt.AlignCenter
@@ -105,7 +109,8 @@ class ProcessQueueModel(TableModel):
     }
 
     def update_row(self, index):
-        self.dataChanged.emit((i := self.index(index, 0)), i)
+        idx = self.index(index, 0)
+        self.dataChanged.emit(idx, idx)
 
 
 class LogTableModel(TableModel):
