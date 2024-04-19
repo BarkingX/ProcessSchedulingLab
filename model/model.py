@@ -6,6 +6,7 @@ from PySide6.QtGui import QColor
 
 from simulation.model import Producer, Consumer, Process
 from simulation.strings import Strings
+from simulation.util import no_operation
 
 
 class SchedulingModel:
@@ -49,6 +50,21 @@ class TableModel(QAbstractTableModel):
         super().__init__(parent)
         self._header = header
         self._data = data
+        self._role_method_map = {
+            Qt.DisplayRole: self._on_display,
+            Qt.TextAlignmentRole: self._on_text_alignment,
+            Qt.BackgroundRole: self._on_background
+        }
+
+    def _on_display(self, index):
+        renderer = self._column_map.get(index.column(), lambda p: None)
+        return renderer(self._data[index.row()])
+
+    def _on_text_alignment(self, index):
+        return Qt.AlignCenter
+
+    def _on_background(self, index):
+        return QColor(Qt.white) if index.row() % 2 == 0 else self._lightgray
 
     def rowCount(self, parent=QModelIndex()):
         return len(self._data)
@@ -59,22 +75,7 @@ class TableModel(QAbstractTableModel):
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return None
-
-        def on_display():
-            renderer = self._column_map.get(index.column(), lambda p: None)
-            return renderer(self._data[index.row()])
-
-        def on_text_alignment():
-            return Qt.AlignCenter
-
-        def on_background():
-            return QColor(Qt.white) if index.row() % 2 == 0 else self._lightgray
-
-        return {
-            Qt.DisplayRole: on_display,
-            Qt.TextAlignmentRole: on_text_alignment,
-            Qt.BackgroundRole: on_background,
-        }.get(role, lambda: None)()
+        return self._role_method_map.get(role, no_operation)(index)
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:

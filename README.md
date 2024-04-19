@@ -11,6 +11,7 @@ RoundRobinSimulator 是一个基于循环调度算法的进程调度模拟应用
 - 详细的进程活动日志。
 
 练习使用MVC模式组织程序结构，尝试参考Android开发的经验，将字符串统一放置到strings.py下管理。
+
 应用大量时间在尝试refactoring代码上，以提高可读性等。
 
 ## 安装
