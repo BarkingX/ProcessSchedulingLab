@@ -10,6 +10,8 @@ RoundRobinSimulator 是一个基于循环调度算法的进程调度模拟应用
 - 进程队列和执行的可视化。
 - 详细的进程活动日志。
 
+练习使用MVC模式组织程序结构，尝试参考Android开发的经验，将字符串统一放置到strings.py下管理。
+应用大量时间在尝试refactoring代码上，以提高可读性等。
 
 ## 安装
 克隆仓库到本地机器并进入目录：
@@ -26,32 +28,3 @@ python app.py
 
 ## 贡献
 欢迎社区贡献。如果您有好的建议或发现任何问题，请fork本仓库并提交Pull Request，或者创建Issue。
-
-# RoundRobinSimulator
-
-## Overview
-RoundRobinSimulator is a process scheduling simulation application designed to demonstrate the Round-Robin scheduling algorithm in a producer/consumer model. It offers an interactive graphical user interface to visualize and manipulate the scheduling process in real-time.
-![ui](https://github.com/BarkingX/RoundRobinSimulator/assets/94052616/92c57949-5a38-4928-b0a5-fc85609db6e5)
-
-## Features
-- Simulate the Round-Robin scheduling algorithm.
-- Interactive producer and consumer process management.
-- Real-time visualization of process queuing and execution.
-- Log outputs for detailed process tracking.
-
-## Installation
-Clone the repository to your local machine:
-```bash
-git clone https://github.com/yourusername/RoundRobinSimulator.git
-cd RoundRobinSimulator
-```
-
-## Usage
-To run the simulation, execute:
-```bash
-python app.py
-```
-Interact with the GUI to add producers and consumers, and observe how the Round-Robin scheduler manages the processes.
-
-## Contributing
-Contributions are welcome. Please fork the repository and submit pull requests, or create issues for bugs and feature requests.
