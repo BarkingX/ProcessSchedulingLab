@@ -1,3 +1,4 @@
+from simulation.model import SchedulingModel
 from simulation.util import *
 
 
@@ -6,7 +7,7 @@ def _log_transition(logs, time, trans, procs):
 
 
 class RoundRobinScheduler:
-    def __init__(self, model, quantum=3):
+    def __init__(self, model: SchedulingModel, quantum=3):
         self.model = model
         self.quantum = quantum
         self.running = None

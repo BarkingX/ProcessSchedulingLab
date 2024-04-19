@@ -1,9 +1,9 @@
 from PySide6.QtCore import QTimer
 
 from simulation.strings import Strings
-from simulation.model.model import (SchedulingModel, ProcessTableModel, ProcessQueueModel,
-                                    LogTableModel)
-from simulation.model.scheduler import RoundRobinScheduler
+from simulation.model import (SchedulingModel, ProcessTableModel, ProcessQueueModel,
+                              LogTableModel)
+from simulation.controller.scheduler import RoundRobinScheduler
 from simulation.util import NoRunnableProcessesError, Log
 from simulation.view import SchedulingView
 

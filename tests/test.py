@@ -1,6 +1,6 @@
 import unittest
 from simulation.model import SchedulingModel
-from simulation.model.scheduler import RoundRobinScheduler, NoRunnableProcessesError
+from simulation.controller.scheduler import RoundRobinScheduler, NoRunnableProcessesError
 from simulation.strings import Strings
 
 
