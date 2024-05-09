@@ -9,8 +9,8 @@ producer_pattern = re.compile('producer', re.I)
 
 
 class Process:
-    metadata = (Strings.PROCESS_ID, Strings.PROCESS_STATE,
-                Strings.PROCESS_TYPE, Strings.PROCESS_REMAINING_TIME)
+    metadata = (Strings.PROCESS_ID, Strings.PROCESS_TYPE,
+                Strings.PROCESS_STATE, Strings.PROCESS_REMAINING_TIME)
     _id_generator = itertools.count(0)
     _working_time_unit = 1
     _default_burst_time = 5 * _working_time_unit

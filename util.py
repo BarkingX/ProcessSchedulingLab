@@ -12,12 +12,14 @@ class State(Enum):
     RUNNING = Strings.RUNNING
     BLOCKED = Strings.BLOCKED
     FINISHED = Strings.FINISHED
+    INITIALED = '-'
 
     def __str__(self):
         return self.value
 
 
 class Transition(Enum):
+    INITIALIZED_READY = (State.INITIALED, State.READY, Strings.INITIALIZED_READY)
     RUNNING_BLOCKED = (State.RUNNING, State.BLOCKED, Strings.RUNNING_BLOCKED)
     RUNNING_READY = (State.RUNNING, State.READY, Strings.RUNNING_READY)
     READY_RUNNING = (State.READY, State.RUNNING, Strings.READY_RUNNING)

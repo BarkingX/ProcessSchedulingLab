@@ -9,20 +9,17 @@ from simulation.view import SchedulingView
 
 def main():
     app = QApplication(sys.argv)
-
+    scheduling_model = SchedulingModel()
+    view = SchedulingView()
+    tablemodel = ProcessTableModel(view, Process.metadata, scheduling_model.processes)
+    runnable_listmodel = ProcessQueueModel(view, [Strings.PROCESS],
+                                           scheduling_model.runnables)
+    blocked_listmodel = ProcessQueueModel(view, [Strings.PROCESS],
+                                          scheduling_model.blockeds)
+    controller = SchedulingController(scheduling_model, view, tablemodel,
+                                      runnable_listmodel, blocked_listmodel)
     try:
-        scheduling_model = SchedulingModel()
-        view = SchedulingView()
-        tablemodel = ProcessTableModel(view, Process.metadata, scheduling_model.processes)
-        runnable_listmodel = ProcessQueueModel(view, [Strings.PROCESS],
-                                               scheduling_model.runnables)
-        blocked_listmodel = ProcessQueueModel(view, [Strings.PROCESS],
-                                              scheduling_model.blockeds)
-
-        controller = SchedulingController(scheduling_model, view, tablemodel,
-                                          runnable_listmodel, blocked_listmodel)
         controller.setup_view()
-
         view.show()
         sys.exit(app.exec())
     except Exception as e:

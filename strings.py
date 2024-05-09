@@ -18,11 +18,13 @@ class Strings:
     SHOW_LOG = '查看日志'
     BURST_TIME_INPUT_TIP = '进程运行时间（秒）'
 
+    INITIALIZED = '-'
     READY = '就绪'
     RUNNING = '运行'
     BLOCKED = '阻塞'
     FINISHED = '完成'
 
+    INITIALIZED_READY = '新建进程'
     RUNNING_BLOCKED = '库存不足'
     RUNNING_READY = '时间片到'
     READY_RUNNING = '调度运行'

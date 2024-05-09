@@ -41,6 +41,9 @@ class SchedulingModel:
         self.processes.append(process)
         self.runnables.append(process)
 
+    def get_last_process(self):
+        return self.processes[-1]
+
 
 class TableModel(QAbstractTableModel):
     _column_map = {}

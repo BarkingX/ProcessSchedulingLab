@@ -3,8 +3,8 @@ from PySide6.QtCore import QTimer
 from simulation.strings import Strings
 from simulation.model import (SchedulingModel, ProcessTableModel, ProcessQueueModel,
                               LogTableModel)
-from simulation.controller.scheduler import RoundRobinScheduler
-from simulation.util import NoRunnableProcessesError, Log
+from simulation.controller.scheduler import RoundRobinScheduler, _log_transition
+from simulation.util import NoRunnableProcessesError, Log, Transition
 from simulation.view import SchedulingView
 
 
@@ -83,6 +83,8 @@ class SchedulingController:
         self._tablemodel.begin_append_row()
         self._runnable_listmodel.begin_append_row()
         self._scheduling_model.add_new_process_of(ptype, float(burst_time))
+        self._scheduler.log_and_transition(Transition.INITIALIZED_READY,
+                                           self._scheduling_model.get_last_process())
         self._tablemodel.end_append_row()
         self._runnable_listmodel.end_append_row()
 
