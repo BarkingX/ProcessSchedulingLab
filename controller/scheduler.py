@@ -71,6 +71,9 @@ class RoundRobinScheduler:
         self.log_and_transition(process, Transition.RUNNING_READY)
         self._model.enqueue_runnable(process)
 
+    def handle_process_initialized(self, process):
+        self.log_and_transition(process, Transition.INITIALIZED_READY)
+
 
 class SchedulerStatus:
     def __init__(self):

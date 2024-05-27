@@ -4,7 +4,7 @@ from simulation.strings import Strings
 from simulation.model import (SchedulingModel, ProcessTableModel, ProcessQueueModel,
                               LogTableModel)
 from simulation.controller.scheduler import RoundRobinScheduler
-from simulation.util import (NoRunnableProcessesError, Log, Transition,
+from simulation.util import (NoRunnableProcessesError, Log,
                              RoundRobinLogger, RoundRobinTimer)
 from simulation.view import SchedulingView
 
@@ -80,8 +80,7 @@ class SchedulingController:
         self._tablemodel.begin_append_row()
         self._runnable_listmodel.begin_append_row()
         self._scheduling_model.add_new_process(*self._view.process_params())
-        self._scheduler.log_and_transition(self._scheduling_model.last_process,
-                                           Transition.INITIALIZED_READY)
+        self._scheduler.handle_process_initialized(self._scheduling_model.last_process)
         self._tablemodel.end_append_row()
         self._runnable_listmodel.end_append_row()
 
