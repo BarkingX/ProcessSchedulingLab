@@ -21,9 +21,9 @@ class SchedulingController:
         self._tablemodel = tablemodel
         self._runnable_listmodel = runnable_listmodel
         self._blocked_listmodel = blocked_listmodel
-
-        self._logger = RoundRobinLogger()
         self._scheduling_timer = RoundRobinTimer()
+        self._logger = RoundRobinLogger()
+
         self._scheduler = RoundRobinScheduler(self._scheduling_model,
                                               self._scheduling_timer, self._logger)
         self._log_tablemodel = LogTableModel(self._view, Log.metadata, self._logger.logs)
@@ -42,23 +42,11 @@ class SchedulingController:
         self._view.set_show_log_callback(self._show_log)
 
     def _handle_timer_timeout(self):
-        def _update_ui_on_process(p):
-            self._tablemodel.update_row(self._scheduling_model.process_index(p))
-            self._runnable_listmodel.update_row(0)
-            self._blocked_listmodel.update_row(0)
-            self._view.update_labels(self._scheduling_timer.now, p.id,
-                                     self._scheduling_model.item_count)
-            self._view.update_views()
-
-        if self._scheduler.running:
-            _update_ui_on_process(self._scheduler.running)
         try:
             self._scheduler.scheduling()
         except NoRunnableProcessesError:
             self._pause_resume()
-
-        if self._scheduler.running or len(self._scheduling_model.blockeds) > 0:
-            _update_ui_on_process(self._scheduler.running)
+        self._update_ui_on_process(self._scheduler.running)
 
     def _pause_resume(self):
         self._pause_simulation() if self._qtimer.isActive() else self._start_simulation()
@@ -72,6 +60,14 @@ class SchedulingController:
         self._qtimer.start(self.TIMER_INTERVAL_MS)
         self._view.start_progress()
         self._view.pause_resume_action.setText(Strings.PAUSE)
+
+    def _update_ui_on_process(self, p):
+        self._tablemodel.update_row(self._scheduling_model.process_index(p))
+        self._runnable_listmodel.update_row(0)
+        self._blocked_listmodel.update_row(0)
+        self._view.update_labels(self._scheduling_timer.now, p.id,
+                                 self._scheduling_model.item_count)
+        self._view.update_views()
 
     def _reset_simulation(self):
         self._logger.clear()
