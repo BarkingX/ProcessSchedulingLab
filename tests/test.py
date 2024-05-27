@@ -30,7 +30,7 @@ class RoundRobinSchedulerTest(unittest.TestCase):
         self.add_consumers(4)
         self.run_scheduler()
 
-        for log in self.scheduler.logger.logs:
+        for log in self.scheduler._logger.logs:
             print(log)
 
         self.assertEqual(len(self.scheduling_model.inventory), 1)

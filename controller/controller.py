@@ -58,8 +58,7 @@ class SchedulingController:
             self._pause_resume()
 
         if self._scheduler.running or len(self._scheduling_model.blockeds) > 0:
-            _update_ui_on_process(self._scheduler.running if self._scheduler.running
-                                  else self._scheduler.last_running)
+            _update_ui_on_process(self._scheduler.running)
 
     def _pause_resume(self):
         self._pause_simulation() if self._qtimer.isActive() else self._start_simulation()

@@ -36,11 +36,17 @@ class SchedulingModel:
     def dequeue_runnables(self):
         return self.runnables.popleft()
 
+    def has_runnable(self):
+        return bool(len(self.runnables))
+
     def enqueue_blocked(self, p):
         self.blockeds.append(p)
 
     def dequeue_blockeds(self):
         return self.blockeds.popleft()
+
+    def has_blocked(self):
+        return bool(len(self.blockeds))
 
     def process_index(self, p):
         try:
