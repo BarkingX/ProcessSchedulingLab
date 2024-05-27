@@ -65,3 +65,20 @@ class Consumer(Process):
         except IndexError as e:
             raise EmptyInventoryError(e)
         super().run()
+
+
+class ProcessFactory:
+    def __init__(self, buffer):
+        self.buffer = buffer
+
+    def create_process(self, ptype, burst_time):
+        return {
+            Strings.PRODUCER_EN: self.create_producer,
+            Strings.CONSUMER_EN: self.create_consumer,
+        }.get(ptype.lower(), self.create_producer)(burst_time)
+
+    def create_producer(self, burst_time):
+        return Producer(self.buffer.append, float(burst_time))
+
+    def create_consumer(self, burst_time):
+        return Consumer(self.buffer.pop, float(burst_time))

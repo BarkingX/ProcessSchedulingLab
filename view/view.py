@@ -132,7 +132,7 @@ class SchedulingView(QMainWindow):
     def stop_progress(self):
         self.progress_bar.setVisible(False)
 
-    def process_type_and_burst_time(self):
+    def process_params(self):
         return self.ptype_dropdown.currentText(), self.burst_time_input.text()
 
     def update_views(self):

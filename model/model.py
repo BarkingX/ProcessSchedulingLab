@@ -1,27 +1,34 @@
 from collections import deque
-from typing import List, Any, Deque, Callable, Dict
+from typing import List, Deque
 
 from PySide6.QtCore import Qt, QModelIndex, QAbstractTableModel
 from PySide6.QtGui import QColor
 
-from simulation.model import Producer, Consumer, Process
-from simulation.strings import Strings
-from simulation.util import no_operation
+from simulation.model import Process
+from simulation.model.process import ProcessFactory
+from simulation.util import no_operation, Item
 
 
 class SchedulingModel:
     def __init__(self):
-        self.inventory: List[Any] = []
+        self.inventory: List[Item] = []
         self.processes: List[Process] = []
         self.runnables: Deque[Process] = deque()
         self.blockeds: Deque[Process] = deque()
-        self._constructors: Dict[str, Callable[[float], Process]] = {
-            Strings.PRODUCER_EN: lambda burst: Producer(self.inventory.append, burst),
-            Strings.CONSUMER_EN: lambda burst: Consumer(self.inventory.pop, burst),
-        }
+        self._pfactory = ProcessFactory(self.inventory)
 
+    @property
     def item_count(self):
         return len(self.inventory)
+
+    @property
+    def last_process(self):
+        return self.processes[-1]
+
+    def add_new_process(self, *args):
+        process = self._pfactory.create_process(*args)
+        self.processes.append(process)
+        self.runnables.append(process)
 
     def process_index(self, p):
         try:
@@ -32,17 +39,6 @@ class SchedulingModel:
     def clear_all(self):
         for collection in [self.processes, self.runnables, self.inventory, self.blockeds]:
             collection.clear()
-
-    def add_new_process_of(self, process_type, burst_time):
-        p_constructor = self._constructors.get(process_type.lower())
-        self.add_new_process(p_constructor(burst_time))
-
-    def add_new_process(self, process):
-        self.processes.append(process)
-        self.runnables.append(process)
-
-    def get_last_process(self):
-        return self.processes[-1]
 
 
 class TableModel(QAbstractTableModel):

@@ -11,11 +11,11 @@ class RoundRobinSchedulerTest(unittest.TestCase):
 
     def add_producers(self, count):
         for _ in range(count):
-            self.scheduling_model.add_new_process_of(Strings.PRODUCER_EN, 5)
+            self.scheduling_model.add_new_process(Strings.PRODUCER_EN, 5)
 
     def add_consumers(self, count):
         for _ in range(count):
-            self.scheduling_model.add_new_process_of(Strings.CONSUMER_EN, 5)
+            self.scheduling_model.add_new_process(Strings.CONSUMER_EN, 5)
 
     def run_scheduler(self):
         try:

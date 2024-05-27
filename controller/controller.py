@@ -44,7 +44,7 @@ class SchedulingController:
             self._runnable_listmodel.update_row(0)
             self._blocked_listmodel.update_row(0)
             self._view.update_labels(self._scheduler.time_now, p.id,
-                                     self._scheduling_model.item_count())
+                                     self._scheduling_model.item_count)
             self._view.update_views()
 
         if self._scheduler.running:
@@ -78,13 +78,11 @@ class SchedulingController:
         self._view.update_views()
 
     def _create_process(self):
-        ptype, burst_time = self._view.process_type_and_burst_time()
-
         self._tablemodel.begin_append_row()
         self._runnable_listmodel.begin_append_row()
-        self._scheduling_model.add_new_process_of(ptype, float(burst_time))
+        self._scheduling_model.add_new_process(*self._view.process_params())
         self._scheduler.log_and_transition(Transition.INITIALIZED_READY,
-                                           self._scheduling_model.get_last_process())
+                                           self._scheduling_model.last_process)
         self._tablemodel.end_append_row()
         self._runnable_listmodel.end_append_row()
 
