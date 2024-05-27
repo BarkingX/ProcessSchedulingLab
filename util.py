@@ -3,10 +3,6 @@ from enum import Enum
 from simulation.strings import Strings
 
 
-def no_operation(*args):
-    pass
-
-
 class State(Enum):
     READY = Strings.READY
     RUNNING = Strings.RUNNING
@@ -52,7 +48,7 @@ class NoRunnableProcessesError(Exception):
 class Log:
     metadata = ('调度时间', '调度进程', '调度前状态', '调度后状态', '描述')
 
-    def __init__(self, occur_time, transition, process):
+    def __init__(self, occur_time, process, transition):
         self.time = occur_time
         self.process = process
         self.transition = transition
@@ -63,6 +59,50 @@ class Log:
 
     def __repr__(self):
         return str(self)
+
+
+class RoundRobinLogger:
+    def __init__(self):
+        self.logs = []
+
+    def log(self, occur_time, process, transition):
+        self.logs.append(Log(occur_time, process, transition))
+
+    def clear(self):
+        self.logs.clear()
+
+
+class RoundRobinTimer:
+    def __init__(self):
+        self.time = 0
+        self.elapsed = 0
+
+    @property
+    def now(self):
+        return self.time
+
+    def within(self, upper, lower=0):
+        return lower <= self.elapsed < upper
+
+    def reset(self):
+        self.reset_time()
+        self.reset_elapsed()
+
+    def reset_time(self):
+        self.time = 0
+
+    def reset_elapsed(self):
+        self.elapsed = 0
+
+    def increment(self, by=1):
+        self.increment_time(by=by)
+        self.increment_elapsed(by=by)
+
+    def increment_time(self, by=1):
+        self.time += by
+
+    def increment_elapsed(self, by=1):
+        self.elapsed += by
 
 
 class Item:

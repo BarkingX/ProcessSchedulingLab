@@ -2,8 +2,7 @@ from simulation.simulator import Simulator
 
 
 def main():
-    simulator = Simulator()
-    simulator.start()
+    Simulator().start()
 
 
 if __name__ == "__main__":

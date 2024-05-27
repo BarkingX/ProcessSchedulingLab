@@ -3,8 +3,9 @@ from PySide6.QtCore import QTimer
 from simulation.strings import Strings
 from simulation.model import (SchedulingModel, ProcessTableModel, ProcessQueueModel,
                               LogTableModel)
-from simulation.controller.scheduler import RoundRobinScheduler, _log_transition
-from simulation.util import NoRunnableProcessesError, Log, Transition
+from simulation.controller.scheduler import RoundRobinScheduler
+from simulation.util import (NoRunnableProcessesError, Log, Transition,
+                             RoundRobinLogger, RoundRobinTimer)
 from simulation.view import SchedulingView
 
 
@@ -21,9 +22,11 @@ class SchedulingController:
         self._runnable_listmodel = runnable_listmodel
         self._blocked_listmodel = blocked_listmodel
 
-        self._scheduler = RoundRobinScheduler(self._scheduling_model)
-        self._log_tablemodel = LogTableModel(self._view, Log.metadata,
-                                             self._scheduler.logs)
+        self._logger = RoundRobinLogger()
+        self._scheduling_timer = RoundRobinTimer()
+        self._scheduler = RoundRobinScheduler(self._scheduling_model,
+                                              self._scheduling_timer, self._logger)
+        self._log_tablemodel = LogTableModel(self._view, Log.metadata, self._logger.logs)
         self._qtimer = QTimer(self._view)
         self._qtimer.timeout.connect(self._handle_timer_timeout)
 
@@ -43,7 +46,7 @@ class SchedulingController:
             self._tablemodel.update_row(self._scheduling_model.process_index(p))
             self._runnable_listmodel.update_row(0)
             self._blocked_listmodel.update_row(0)
-            self._view.update_labels(self._scheduler.time_now, p.id,
+            self._view.update_labels(self._scheduling_timer.now, p.id,
                                      self._scheduling_model.item_count)
             self._view.update_views()
 
@@ -72,8 +75,9 @@ class SchedulingController:
         self._view.pause_resume_action.setText(Strings.PAUSE)
 
     def _reset_simulation(self):
+        self._logger.clear()
         self._scheduler.reset()
-        self._scheduling_model.clear_all()
+        self._scheduling_model.reset()
         self._view.update_labels(0, None, 0)
         self._view.update_views()
 
@@ -81,8 +85,8 @@ class SchedulingController:
         self._tablemodel.begin_append_row()
         self._runnable_listmodel.begin_append_row()
         self._scheduling_model.add_new_process(*self._view.process_params())
-        self._scheduler.log_and_transition(Transition.INITIALIZED_READY,
-                                           self._scheduling_model.last_process)
+        self._scheduler.log_and_transition(self._scheduling_model.last_process,
+                                           Transition.INITIALIZED_READY)
         self._tablemodel.end_append_row()
         self._runnable_listmodel.end_append_row()
 

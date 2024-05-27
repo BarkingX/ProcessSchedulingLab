@@ -6,7 +6,7 @@ from PySide6.QtGui import QColor
 
 from simulation.model import Process
 from simulation.model.process import ProcessFactory
-from simulation.util import no_operation, Item
+from simulation.util import Item
 
 
 class SchedulingModel:
@@ -30,13 +30,25 @@ class SchedulingModel:
         self.processes.append(process)
         self.runnables.append(process)
 
+    def enqueue_runnable(self, p):
+        self.runnables.append(p)
+
+    def dequeue_runnables(self):
+        return self.runnables.popleft()
+
+    def enqueue_blocked(self, p):
+        self.blockeds.append(p)
+
+    def dequeue_blockeds(self):
+        return self.blockeds.popleft()
+
     def process_index(self, p):
         try:
             return self.processes.index(p)
         except ValueError:
             return 0
 
-    def clear_all(self):
+    def reset(self):
         for collection in [self.processes, self.runnables, self.inventory, self.blockeds]:
             collection.clear()
 
@@ -74,7 +86,7 @@ class TableModel(QAbstractTableModel):
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return None
-        return self._role_method_map.get(role, no_operation)(index)
+        return self._role_method_map.get(role, lambda _: None)(index)
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
