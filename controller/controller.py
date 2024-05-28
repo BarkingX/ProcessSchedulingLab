@@ -4,7 +4,6 @@ from simulation.strings import Strings
 from simulation.model import (SchedulingModel, ProcessTableModel, ProcessQueueModel,
                               LogTableModel, Process)
 from simulation.controller.scheduler import RoundRobinScheduler
-from simulation.controller.command import InitializeCommand
 from simulation.util import (NoRunnableProcessesError, Log)
 from simulation.view import SchedulingView
 
@@ -88,8 +87,7 @@ class SchedulingController:
         self._tablemodel.begin_append_row()
         self._runnable_listmodel.begin_append_row()
         self._model.add_new_process(*self._view.process_params())
-        self._scheduler.execute_command(InitializeCommand(self._scheduler),
-                                        self._model.last_process)
+        self._scheduler.welcome_new_process()
         self._tablemodel.end_append_row()
         self._runnable_listmodel.end_append_row()
 

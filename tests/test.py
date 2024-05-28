@@ -35,7 +35,7 @@ class RoundRobinSchedulerTest(unittest.TestCase):
         for log in self.scheduler.logs:
             print(log)
 
-        self.assertEqual(len(self.scheduling_model.inventory), 1)
+        self.assertEqual(len(self.scheduling_model._inventory), 1)
         self.assertTrue(self.scheduler.running.state == State.FINISHED)
         self.assertFalse(self.scheduling_model.has_runnable())
         self.assertFalse(self.scheduling_model.has_blocked())

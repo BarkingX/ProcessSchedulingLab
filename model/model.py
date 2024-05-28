@@ -1,39 +1,48 @@
 from collections import deque
-from typing import List, Deque
 
 from PySide6.QtCore import Qt, QModelIndex, QAbstractTableModel
 from PySide6.QtGui import QColor
 
-from simulation.model import Process
 from simulation.model.process import ProcessCreator
-from simulation.util import Item
 
 
 class SchedulingModel:
     def __init__(self):
-        self.inventory: List[Item] = []
-        self.processes: List[Process] = []
-        self.runnables: Deque[Process] = deque()
-        self.blockeds: Deque[Process] = deque()
-        self._pfactory = ProcessCreator(self.inventory)
+        self._inventory = []
+        self._processes = []
+        self._runnables = deque()
+        self._blockeds = deque()
+        self._pcreator = ProcessCreator(self._inventory)
+
+    @property
+    def processes(self):
+        return self._processes
+
+    @property
+    def runnables(self):
+        return self._runnables
+
+    @property
+    def blockeds(self):
+        return self._blockeds
 
     @property
     def item_count(self):
-        return len(self.inventory)
+        return len(self._inventory)
 
     @property
     def last_process(self):
         return self.processes[-1]
 
     def add_new_process(self, *args):
-        process = self._pfactory.create_process(*args)
+        process = self._pcreator.create_process(*args)
         self.processes.append(process)
         self.runnables.append(process)
 
     def enqueue_runnable(self, p):
         self.runnables.append(p)
 
-    def dequeue_runnables(self):
+    def dequeue_runnable(self):
         return self.runnables.popleft()
 
     def has_runnable(self):
@@ -42,7 +51,7 @@ class SchedulingModel:
     def enqueue_blocked(self, p):
         self.blockeds.append(p)
 
-    def dequeue_blockeds(self):
+    def dequeue_blocked(self):
         return self.blockeds.popleft()
 
     def has_blocked(self):
@@ -55,7 +64,7 @@ class SchedulingModel:
             return 0
 
     def reset(self):
-        for collection in [self.processes, self.runnables, self.inventory, self.blockeds]:
+        for collection in [self.processes, self.runnables, self._inventory, self.blockeds]:
             collection.clear()
 
 
