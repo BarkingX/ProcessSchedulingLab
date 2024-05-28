@@ -1,11 +1,8 @@
 import itertools
 import math
-import re
 
 from simulation.strings import Strings
 from simulation.util import State, EmptyInventoryError, Item
-
-producer_pattern = re.compile('producer', re.I)
 
 
 class Process:
@@ -67,18 +64,18 @@ class Consumer(Process):
         super().run()
 
 
-class ProcessFactory:
+class ProcessCreator:
     def __init__(self, buffer):
-        self.buffer = buffer
+        self._buffer = buffer
 
     def create_process(self, ptype, burst_time):
         return {
             Strings.PRODUCER_EN: self.create_producer,
             Strings.CONSUMER_EN: self.create_consumer,
-        }.get(ptype.lower(), self.create_producer)(burst_time)
+        }.get(str.lower(ptype), self.create_producer)(burst_time)
 
     def create_producer(self, burst_time):
-        return Producer(self.buffer.append, float(burst_time))
+        return Producer(self._buffer.append, float(burst_time))
 
     def create_consumer(self, burst_time):
-        return Consumer(self.buffer.pop, float(burst_time))
+        return Consumer(self._buffer.pop, float(burst_time))

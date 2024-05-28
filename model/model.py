@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, QModelIndex, QAbstractTableModel
 from PySide6.QtGui import QColor
 
 from simulation.model import Process
-from simulation.model.process import ProcessFactory
+from simulation.model.process import ProcessCreator
 from simulation.util import Item
 
 
@@ -15,7 +15,7 @@ class SchedulingModel:
         self.processes: List[Process] = []
         self.runnables: Deque[Process] = deque()
         self.blockeds: Deque[Process] = deque()
-        self._pfactory = ProcessFactory(self.inventory)
+        self._pfactory = ProcessCreator(self.inventory)
 
     @property
     def item_count(self):

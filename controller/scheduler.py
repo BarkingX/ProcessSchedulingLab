@@ -2,11 +2,11 @@ from simulation.util import *
 
 
 class RoundRobinScheduler:
-    def __init__(self, model, timer, logger, quantum=3):
+    def __init__(self, model, quantum=3):
         self._model = model
-        self._timer = timer
-        self._logger = logger
         self._quantum = quantum
+        self._timer = RoundRobinTimer()
+        self._logger = RoundRobinLogger()
         self._status = SchedulerStatus()
 
     @property
@@ -14,7 +14,16 @@ class RoundRobinScheduler:
         return (self._status.last_running if self._status.no_running_process()
                 else self._status.running)
 
+    @property
+    def now(self):
+        return self._timer.now
+
+    @property
+    def logs(self):
+        return self._logger.logs
+
     def reset(self):
+        self._logger.reset()
         self._status.reset()
         self._timer.reset()
 

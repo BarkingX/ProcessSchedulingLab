@@ -68,7 +68,7 @@ class RoundRobinLogger:
     def log(self, occur_time, process, transition):
         self.logs.append(Log(occur_time, process, transition))
 
-    def clear(self):
+    def reset(self):
         self.logs.clear()
 
 
