@@ -1,3 +1,5 @@
+from simulation.controller.command import *
+from simulation.controller.util import *
 from simulation.util import *
 
 
@@ -33,8 +35,7 @@ class RoundRobinScheduler:
             self._try_unblock_if_possible()
             if not self._model.has_runnable():
                 raise NoRunnableProcessesError()
-            self._status.running = self._model.dequeue_runnables()
-            self._handle_pickup(self._status.running)
+            self.execute_command(PickUpCommand(self), self._model.dequeue_runnables())
 
         self._run_process(self._status.running)
         self._update_process_state(self._status.running)
@@ -42,18 +43,7 @@ class RoundRobinScheduler:
 
     def _try_unblock_if_possible(self):
         if self._model.has_blocked() and self._model.item_count > 0:
-            self._handle_awake_blocked(self._model.dequeue_blockeds())
-
-    def _handle_awake_blocked(self, blocked):
-        self.log_and_transition(blocked, Transition.BLOCKED_READY)
-        self._model.enqueue_runnable(blocked)
-
-    def log_and_transition(self, p, t):
-        self._logger.log(self._timer.now, p, t)
-        p.state = t.after()
-
-    def _handle_pickup(self, ready):
-        self.log_and_transition(ready, Transition.READY_RUNNING)
+            self.execute_command(AwakeCommand(self), self._model.dequeue_blockeds())
 
     def _run_process(self, process):
         try:
@@ -61,45 +51,22 @@ class RoundRobinScheduler:
                 process.run()
                 self._timer.increment()
         except EmptyInventoryError:
-            self._handle_inventory_empty(process)
-
-    def _handle_inventory_empty(self, process):
-        self.log_and_transition(process, Transition.RUNNING_BLOCKED)
-        self._model.enqueue_blocked(process)
+            self.execute_command(BlockCommand(self), process)
 
     def _update_process_state(self, process):
         if process.remaining_time <= 0:
-            self._handle_process_completion(process)
+            self.execute_command(CompleteCommand(self), process)
         elif not self._timer.within(self._quantum):
-            self._handle_quantum_expiry(process)
+            self.execute_command(ExpiryCommand(self), process)
 
-    def _handle_process_completion(self, process):
-        self.log_and_transition(process, Transition.RUNNING_FINISHED)
+    def execute_command(self, command, process):
+        self._logger.log(self._timer.now, process, command.execute(process))
 
-    def _handle_quantum_expiry(self, process):
-        self.log_and_transition(process, Transition.RUNNING_READY)
+    def set_running(self, process):
+        self._status.running = process
+
+    def enqueue_runnable(self, process):
         self._model.enqueue_runnable(process)
 
-    def handle_process_initialized(self, process):
-        self.log_and_transition(process, Transition.INITIALIZED_READY)
-
-
-class SchedulerStatus:
-    def __init__(self):
-        self.running = None
-        self.last_running = None
-
-    def no_running_process(self):
-        return self.running is None
-
-    def reset(self):
-        self.reset_running()
-        self.last_running = None
-
-    def update(self):
-        if self.running.state != State.RUNNING:
-            self.reset_running()
-
-    def reset_running(self):
-        self.last_running = self.running
-        self.running = None
+    def enqueue_blocked(self, process):
+        self._model.enqueue_blocked(process)

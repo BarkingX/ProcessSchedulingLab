@@ -1,9 +1,7 @@
 import sys
 
 from PySide6.QtWidgets import QApplication
-from simulation.strings import Strings
-from simulation.model import (SchedulingModel, ProcessTableModel,
-                              Process)
+from simulation.model import (SchedulingModel)
 from simulation.controller import SchedulingController
 from simulation.view import SchedulingView
 
@@ -13,10 +11,7 @@ class Simulator:
         self._app = QApplication(sys.argv)
         self.model = SchedulingModel()
         self.view = SchedulingView()
-        self.controller = SchedulingController(
-            self.model, self.view,
-
-        )
+        self.controller = SchedulingController(self.model, self.view)
 
     def start(self):
         try:

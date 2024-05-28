@@ -1,8 +1,9 @@
 import unittest
 from simulation.model import SchedulingModel
 from simulation.controller.scheduler import RoundRobinScheduler, NoRunnableProcessesError
+from simulation.controller.util import RoundRobinTimer, RoundRobinLogger
 from simulation.strings import Strings
-from simulation.util import RoundRobinLogger, RoundRobinTimer, State
+from simulation.util import State
 
 
 class RoundRobinSchedulerTest(unittest.TestCase):
@@ -31,8 +32,8 @@ class RoundRobinSchedulerTest(unittest.TestCase):
         self.add_consumers(4)
         self.run_scheduler()
 
-        # for log in self.scheduler.logs:
-        #     print(log)
+        for log in self.scheduler.logs:
+            print(log)
 
         self.assertEqual(len(self.scheduling_model.inventory), 1)
         self.assertTrue(self.scheduler.running.state == State.FINISHED)

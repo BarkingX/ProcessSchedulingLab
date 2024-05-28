@@ -27,6 +27,9 @@ class Process:
     def remaining_time(self, value):
         self._remaining_time = max(0, value)
 
+    def set_state(self, state):
+        self.state = state
+
     def run(self):
         if self.remaining_time > 0:
             self.remaining_time -= self._working_time_unit
